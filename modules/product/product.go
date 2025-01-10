@@ -1,9 +1,9 @@
-package models
+package product_scope
 
 import (
 	"fmt"
 
-	"github.com/Sinet2000/go-eshop-console/domain/exceptions"
+	"github.com/Sinet2000/go-eshop-console/exceptions"
 )
 
 type Product struct {

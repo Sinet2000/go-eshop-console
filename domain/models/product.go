@@ -7,18 +7,21 @@ import (
 )
 
 type Product struct {
-	ID          int
-	Name        string
-	Description string // Detailed description of the product
-	SKU         string
-	Price       float32
-	Stock       int
-	ImageURL    string
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	SKU         string  `json:"sku"`
+	Price       float32 `json:"price"`
+	Stock       int     `json:"stock"`
+	ImageURL    string  `json:"imageUrl"`
 }
 
-func NewProduct(id int, name, description string, price float32, stock int, imageURL string) (*Product, error) {
+func CreateProduct(id int, name, sku, description string, price float32, stock int, imageURL string) (*Product, error) {
 	if name == "" {
 		return nil, &exceptions.DomainException{Message: "Product name cannot be empty"}
+	}
+	if sku == "" {
+		return nil, &exceptions.DomainException{Message: "SKU cannot be empty"}
 	}
 	if price <= 0 {
 		return nil, &exceptions.DomainException{Message: "Price must be a positive value"}
@@ -30,6 +33,7 @@ func NewProduct(id int, name, description string, price float32, stock int, imag
 	product := &Product{
 		ID:          id,
 		Name:        name,
+		SKU:         sku,
 		Description: description,
 		Price:       price,
 		Stock:       stock,

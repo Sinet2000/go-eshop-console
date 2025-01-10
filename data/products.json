@@ -1,0 +1,73 @@
+[
+    {
+      "name": "Samsung Galaxy S23 Ultra",
+      "sku": "SGS23U-001",
+      "description": "The latest flagship smartphone from Samsung with a 200MP camera, 6.8-inch AMOLED display, and long-lasting battery.",
+      "price": 1199.99,
+      "stock": 120
+    },
+    {
+      "name": "Sony WH-1000XM5 Wireless Noise-Canceling Headphones",
+      "sku": "SW1000XM5-002",
+      "description": "Over-ear headphones with industry-leading noise cancellation, exceptional sound quality, and a comfortable design.",
+      "price": 349.99,
+      "stock": 80
+    },
+    {
+      "name": "Apple Watch Series 8",
+      "sku": "AW8-003",
+      "description": "A smartwatch with advanced health features like ECG, heart rate monitoring, and an always-on display for daily use.",
+      "price": 399.00,
+      "stock": 60
+    },
+    {
+      "name": "Microsoft Surface Pro 9",
+      "sku": "SP9-004",
+      "description": "A 2-in-1 laptop and tablet with a high-resolution PixelSense display, powerful performance, and versatile design for work and play.",
+      "price": 1099.00,
+      "stock": 150
+    },
+    {
+      "name": "Bose QuietComfort 45 Headphones",
+      "sku": "BQ45-005",
+      "description": "Noise-canceling headphones with exceptional sound and a lightweight design for all-day comfort.",
+      "price": 329.99,
+      "stock": 75
+    },
+    {
+      "name": "NVIDIA GeForce RTX 3080",
+      "sku": "NVRTX3080-006",
+      "description": "High-performance graphics card for gaming and creative work with real-time ray tracing and AI features.",
+      "price": 699.99,
+      "stock": 50
+    },
+    {
+      "name": "GoPro HERO10 Black",
+      "sku": "GPH10-007",
+      "description": "A versatile action camera with 5.3K video, HyperSmooth 4.0 stabilization, and waterproof capabilities for adventurous shooting.",
+      "price": 499.99,
+      "stock": 100
+    },
+    {
+      "name": "Dell XPS 13 Laptop",
+      "sku": "DXP13-008",
+      "description": "A sleek and powerful ultrabook with a 13-inch InfinityEdge display, Intel Core i7 processor, and long battery life.",
+      "price": 1499.00,
+      "stock": 40
+    },
+    {
+      "name": "Samsung QLED 55-inch TV",
+      "sku": "QLED55-009",
+      "description": "A 55-inch 4K smart TV with Quantum Dot technology, offering vibrant colors and excellent contrast for a cinematic experience.",
+      "price": 899.99,
+      "stock": 30
+    },
+    {
+      "name": "Sony PlayStation 5 Console",
+      "sku": "PS5-010",
+      "description": "The latest gaming console from Sony, featuring lightning-fast load times, stunning graphics, and an extensive game library.",
+      "price": 499.99,
+      "stock": 200
+    }
+  ]
+  

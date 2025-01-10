@@ -1,106 +1,71 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"time"
 
-	"github.com/Sinet2000/go-eshop-console/config"
-	"github.com/Sinet2000/go-eshop-console/internal/db"
-	"github.com/Sinet2000/go-eshop-console/internal/services"
-	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
-	"github.com/Sinet2000/go-eshop-console/tables"
-	"github.com/Sinet2000/go-eshop-console/views"
+	"github.com/Sinet2000/go-eshop-console/domain/models"
+	"github.com/Sinet2000/go-eshop-console/utils"
 )
 
-const productsFilePath = "data/products.json"
-
 func main() {
-	_, err := db.NewPgService()
-	if err != nil {
-		log.Fatalf("Failed to connect to PostgreSQL Db: %v", err)
-	}
-
-	mongoDbContext, err := db.NewMongoService(config.GetEnv("MONGO_DB_NAME"))
-	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-
-	defer func() {
-		if err := mongoDbContext.Close(); err != nil {
-			log.Printf("Error during MongoDB closure: %v", err)
-		}
-	}()
-
-	productRepo := db.NewProductRepository(mongoDbContext.DB)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	productService := services.NewProductService(productRepo)
-
 	adminName := "root"
+	productStock := []models.Product{}
+	newProduct, err := models.CreateProduct(
+		len(productStock)-1,
+		"Apple MacBook Pro 14-inch",
+		"AMP14-001",
+		"A high-performance laptop with Apple's M1 Pro chip, featuring a stunning Retina display and long-lasting battery life.",
+		1299.99, 45, "")
+	if err != nil {
+		utils.PrintColoredText("❗An error occurred: ", utils.RedTxtColorCode)
+		fmt.Println(err)
+	}
 
-	fmt.Println()
-	fmt.Println()
+	productStock = append(productStock, *newProduct)
+
 	for {
-		currentTime := time.Now().Format("2006-01-02 15:04")
-
+		fmt.Printf("Hello %s - %s\n", adminName, time.Now().Format("2006-01-02 15:04"))
 		fmt.Println("WSC - Product Management 🛠️")
-		fmt.Printf("Hello %s - %s\n", adminName, currentTime)
-		views.DisplayMainMenu()
+		fmt.Println("------------------------------------------")
+		fmt.Println("[1] 📜 List Products")
+		fmt.Println("[2] 📝 Product details")
+		fmt.Println("[3] 🔄 Edit product")
+		fmt.Println("[4] 🗑️ Delete product")
+		fmt.Println("[5] 🆕 Create product")
+		fmt.Println("[0] 🛑 Quit")
+		fmt.Printf("\n\nSelect an option: ")
 
 		var choice int
-		fmt.Printf("\nSelect an option: ")
 		_, err := fmt.Scan(&choice)
 
 		if err != nil {
-			logger.PrintlnColoredText("❗ Invalid input. Please enter a number between 0 and 5. ❗", logger.RedTxtColorCode)
+			utils.PrintlnColoredText("❗ Invalid input. Please enter a number between 0 and 5. ❗", utils.RedTxtColorCode)
 			continue
 		}
 
-		fmt.Println("\nPress Enter to continue...")
-		fmt.Scanln()
-
 		switch choice {
-		case 0:
-			logger.PrintlnColoredText("🛑 Quit", logger.GreenTxtColorCode)
-			fmt.Println("Goodbye! 👋")
-
-			return
 		case 1:
-			logger.PrintlnColoredText("📜 List Products", logger.GreenTxtColorCode)
-
-			productStock, err := productService.ListAllProducts(ctx)
-			if err != nil {
-				log.Fatalf("Error fetching products: %v", err)
-			}
-
-			tables.ListProducts(productStock)
-		case 2:
-
-			var productID string
-			fmt.Printf("\nEnter the product ID:")
-			_, err = fmt.Scan(&productID)
-			if err != nil {
-				logger.PrintlnColoredText("❗ Invalid input. Please enter valid product ID ❗", logger.RedTxtColorCode)
-				continue
-			}
-
-			productDetails, err := productService.GetProductById(ctx, productID)
-			if err != nil {
-				fmt.Println("Error:", err)
-				continue
-			}
-
-			views.DisplayProductDetails(productDetails)
-		case 6:
-			productService.Seed(ctx)
+			utils.PrintlnColoredText("📜 List Products", utils.GreenTxtColorCode)
+		case 0:
+			utils.PrintlnColoredText("🛑 Quit", utils.GreenTxtColorCode)
+			fmt.Println("Goodbye! 👋")
+			return
 		default:
 			fmt.Println("❗Invalid choice. Please try again. ❗")
 		}
-
-		fmt.Println("\nPress Enter to continue...")
-		fmt.Scanln()
 	}
 }
+
+// Quit the program: 🛑
+// Goodbye: 👋
+// Delete action: 🗑️
+// Create new item: ➕
+// List items: 📜
+// Update in progress: 🔄
+// Success: ✅
+// Error: ❗ (Exclamation Mark) or ⚠️ (Warning Sign)
+// Management: 🛠️
+// Products: 📦
+// Order: 📝
+// Person: 👤

@@ -1,58 +1,71 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"github.com/Sinet2000/go-eshop-console/config"
-	"github.com/Sinet2000/go-eshop-console/handlers"
-	"github.com/Sinet2000/go-eshop-console/internal/db"
-	"github.com/Sinet2000/go-eshop-console/internal/utils"
-	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
-	"log"
+	"time"
+
+	"github.com/Sinet2000/go-eshop-console/domain/models"
+	"github.com/Sinet2000/go-eshop-console/utils"
 )
 
 func main() {
-	isAdmin, err := utils.Confirm("Are you admin?")
+	adminName := "root"
+	productStock := []models.Product{}
+	newProduct, err := models.CreateProduct(
+		len(productStock)-1,
+		"Apple MacBook Pro 14-inch",
+		"AMP14-001",
+		"A high-performance laptop with Apple's M1 Pro chip, featuring a stunning Retina display and long-lasting battery life.",
+		1299.99, 45, "")
 	if err != nil {
-		log.Fatalf("Error: %v", err)
-	}
-	if !isAdmin {
-		logger.PrintlnColoredText("UNAUTHORISED", logger.ErrorColor)
-		return
+		utils.PrintColoredText("❗An error occurred: ", utils.RedTxtColorCode)
+		fmt.Println(err)
 	}
 
-	config.LoadConfig()
-	//_, err = db.NewPgService()
-	// if err != nil {
-	//	log.Fatalf("Failed to connect to PostgreSQL Db: %v", err)
-	// }
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	mongoDbContext, err := db.NewMongoService(config.GetEnv("MONGO_DB_NAME"), ctx)
-	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-
-	defer func() {
-		if err := mongoDbContext.Close(); err != nil {
-			log.Printf("Error during MongoDB closure: %v", err)
-		}
-	}()
-
-	productRepo := db.NewProductRepository(mongoDbContext.DB)
-
-	fmt.Println()
+	productStock = append(productStock, *newProduct)
 
 	for {
-		adminMenuHandler := handlers.NewAdminHandler(productRepo)
-		isExit := adminMenuHandler.RunAdminMenu(ctx)
+		fmt.Printf("Hello %s - %s\n", adminName, time.Now().Format("2006-01-02 15:04"))
+		fmt.Println("WSC - Product Management 🛠️")
+		fmt.Println("------------------------------------------")
+		fmt.Println("[1] 📜 List Products")
+		fmt.Println("[2] 📝 Product details")
+		fmt.Println("[3] 🔄 Edit product")
+		fmt.Println("[4] 🗑️ Delete product")
+		fmt.Println("[5] 🆕 Create product")
+		fmt.Println("[0] 🛑 Quit")
+		fmt.Printf("\n\nSelect an option: ")
 
-		if isExit {
-			logger.PrintlnColoredText("Quit 🚪", logger.SuccessColor)
+		var choice int
+		_, err := fmt.Scan(&choice)
+
+		if err != nil {
+			utils.PrintlnColoredText("❗ Invalid input. Please enter a number between 0 and 5. ❗", utils.RedTxtColorCode)
+			continue
+		}
+
+		switch choice {
+		case 1:
+			utils.PrintlnColoredText("📜 List Products", utils.GreenTxtColorCode)
+		case 0:
+			utils.PrintlnColoredText("🛑 Quit", utils.GreenTxtColorCode)
 			fmt.Println("Goodbye! 👋")
-			break
+			return
+		default:
+			fmt.Println("❗Invalid choice. Please try again. ❗")
 		}
 	}
 }
+
+// Quit the program: 🛑
+// Goodbye: 👋
+// Delete action: 🗑️
+// Create new item: ➕
+// List items: 📜
+// Update in progress: 🔄
+// Success: ✅
+// Error: ❗ (Exclamation Mark) or ⚠️ (Warning Sign)
+// Management: 🛠️
+// Products: 📦
+// Order: 📝
+// Person: 👤

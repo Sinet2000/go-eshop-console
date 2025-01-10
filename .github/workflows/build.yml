@@ -1,0 +1,44 @@
+name: CI/CD Pipeline for Go Console App
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.22.2'
+
+      # Cache Go dependencies
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/*.go') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mod-
+
+      - name: Install Go dependencies
+        run: go mod tidy
+
+      - name: Build Go app
+        run: go build -o app ./main.go
+
+      # Run Go app
+      - name: Run Go app
+        run: ./app

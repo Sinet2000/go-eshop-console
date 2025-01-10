@@ -107,7 +107,6 @@ Branch names should follow this structure: `<phase>/(WSC-<ticket-number>)-<featu
 - `feat`: For new features.
 - `enhance`: Feature enhancements and improvements.
 - `fix`: For bug fixes.
-- `chore`: For maintenance tasks like setup.
 - `docs`: For documentation changes.
 - `refactor`: For code restructuring.
 - `test`: For adding or improving tests.
@@ -117,7 +116,6 @@ Branch names should follow this structure: `<phase>/(WSC-<ticket-number>)-<featu
 - `feat/(WSC-4)-product-listing`: Adding a new feature for listing products.
 - `enhance/(WSC-8)-filter-products`: Enhancing filtering options for products.
 - `fix/(WSC-12)-error-handling`: Fixing bugs in error handling.
-- `chore/(WSC-1)-project-setup`: Setting up the initial project structure.
 - `docs/(WSC-15)-update-readme`: Updating project documentation.
 - `refactor/(WSC-11)-catalog-module`: Restructuring the catalog module for efficiency.
 - `test/(WSC-14)-add-unit-tests`: Adding unit tests for core functionality.

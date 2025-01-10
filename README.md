@@ -51,6 +51,8 @@ Email: ...
 Select an option: _
 ```
 
+---
+
 ### Example: Customer Menu
 
 ```
@@ -89,3 +91,70 @@ Options:
 Select an option: _
 
 ```
+
+---
+
+## Git Guidelines
+
+This document outlines the naming conventions for branches and commits to ensure clarity, traceability, and consistency in the project.
+
+### **Branch Naming Convention**
+Branch names should follow this structure: `<phase>/(WSC-<ticket-number>)-<feature-or-task-name>`
+
+### **Phases**
+
+- `init`: Setting up the initial project structure.
+- `feat`: For new features.
+- `enhance`: Feature enhancements and improvements.
+- `fix`: For bug fixes.
+- `chore`: For maintenance tasks like setup.
+- `docs`: For documentation changes.
+- `refactor`: For code restructuring.
+- `test`: For adding or improving tests.
+
+### **Examples**
+- `init/(WSC-<ticket-number>)-project-setup`: Setting up the initial project structure.
+- `feat/(WSC-4)-product-listing`: Adding a new feature for listing products.
+- `enhance/(WSC-8)-filter-products`: Enhancing filtering options for products.
+- `fix/(WSC-12)-error-handling`: Fixing bugs in error handling.
+- `chore/(WSC-1)-project-setup`: Setting up the initial project structure.
+- `docs/(WSC-15)-update-readme`: Updating project documentation.
+- `refactor/(WSC-11)-catalog-module`: Restructuring the catalog module for efficiency.
+- `test/(WSC-14)-add-unit-tests`: Adding unit tests for core functionality.
+
+### **Commit Message Rules**
+
+Commit messages should follow this format: `type(WSC-<ticket-number>):<short description>`
+
+### **Best Practices**
+1. **Write Descriptive Commit Messages**:
+   - Keep them concise yet informative.
+   - Example: `fix(WSC-2): handle invalid payment input gracefully`.
+
+2. **Group Related Changes in Branches**:
+   - Focus each branch on a single task or feature.
+   - Avoid unrelated changes in a single branch.
+
+3. **Keep Commits Atomic**:
+   - Each commit should represent a logical change.
+   - Example: Separate commits for adding functionality and fixing bugs.
+
+4. **Use Pull Requests (PRs)**:
+   - Always create a pull request for branch merges.
+   - Include detailed descriptions of changes in the PR.
+
+### **Workflow Example**
+
+1. **Branch Creation**:
+   - Create a branch for the task: `core/product-listing`.
+
+2. **Commit Example**:
+   - `feat(PAT): implement product listing with stock status`
+
+3. **Pull Request**:
+   - PR Title: `Implement product listing feature`
+   - PR Description:
+     - Adds functionality to display product list with stock status.
+     - Handles edge cases for empty product list.
+
+---

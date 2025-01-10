@@ -110,6 +110,7 @@ Branch names should follow this structure: `<phase>/(WSC-<ticket-number>)-<featu
 - `docs`: For documentation changes.
 - `refactor`: For code restructuring.
 - `test`: For adding or improving tests.
+- `infra`: infrastructure management, ci/cd, including cloud setup, networking, servers
 
 ### **Examples**
 - `init/(WSC-<ticket-number>)-project-setup`: Setting up the initial project structure.
@@ -119,6 +120,7 @@ Branch names should follow this structure: `<phase>/(WSC-<ticket-number>)-<featu
 - `docs/(WSC-15)-update-readme`: Updating project documentation.
 - `refactor/(WSC-11)-catalog-module`: Restructuring the catalog module for efficiency.
 - `test/(WSC-14)-add-unit-tests`: Adding unit tests for core functionality.
+- `infra/(WSC-15)-add-azure-logging`: Adding Logging to Azure
 
 ### **Commit Message Rules**
 

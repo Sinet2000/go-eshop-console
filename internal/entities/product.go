@@ -1,23 +1,22 @@
-package entities
+package models
 
 import (
 	"fmt"
 
-	"github.com/Sinet2000/go-eshop-console/exceptions"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/Sinet2000/go-eshop-console/domain/exceptions"
 )
 
 type Product struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name        string             `json:"name" bson:"name"`
-	Description string             `json:"description" bson:"description"`
-	SKU         string             `json:"sku" bson:"sku"`
-	Price       float64            `json:"price" bson:"price"`
-	Stock       int                `json:"stock" bson:"stock"`
-	ImageURL    string             `json:"imageUrl" bson:"imageUrl"`
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	SKU         string  `json:"sku"`
+	Price       float32 `json:"price"`
+	Stock       int     `json:"stock"`
+	ImageURL    string  `json:"imageUrl"`
 }
 
-func CreateProduct(name, sku, description string, price float64, stock int) (*Product, error) {
+func CreateProduct(id int, name, sku, description string, price float32, stock int, imageURL string) (*Product, error) {
 	if name == "" {
 		return nil, &exceptions.DomainException{Message: "Product name cannot be empty"}
 	}
@@ -32,12 +31,13 @@ func CreateProduct(name, sku, description string, price float64, stock int) (*Pr
 	}
 
 	product := &Product{
+		ID:          id,
 		Name:        name,
 		SKU:         sku,
 		Description: description,
 		Price:       price,
 		Stock:       stock,
-		ImageURL:    "",
+		ImageURL:    imageURL,
 	}
 
 	return product, nil
@@ -53,7 +53,7 @@ func (p *Product) UpdateStock(amount int) error {
 }
 
 // SetPrice allows updating the product's price.
-func (p *Product) SetPrice(newPrice float64) error {
+func (p *Product) SetPrice(newPrice float32) error {
 	if newPrice <= 0 {
 		return &exceptions.DomainException{Message: "Price must be a positive value"}
 	}

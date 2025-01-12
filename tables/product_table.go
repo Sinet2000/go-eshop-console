@@ -1,4 +1,4 @@
-package views
+package tables
 
 import (
 	"fmt"
@@ -8,14 +8,21 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ShowProductTable(products []entities.Product) {
+func ListProducts(products []entities.Product) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetCaption(true, "WSC - Products Stock 📦")
 	table.SetHeader([]string{"ID", "Name", "SKU", "Price"})
 
 	for _, product := range products {
+		var idString string
+		if product.ID.IsZero() {
+			idString = "N/A"
+		} else {
+			idString = product.ID.Hex()
+		}
+
 		table.Append([]string{
-			fmt.Sprintf("%d", product.ID),
+			idString,
 			limitStringLength(product.Name, 45),
 			product.SKU,
 			fmt.Sprintf("%.2f", product.Price),

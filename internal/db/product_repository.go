@@ -2,10 +2,12 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/Sinet2000/go-eshop-console/internal/entities"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -62,4 +64,19 @@ func (r *ProductRepository) ListAll(ctx context.Context) ([]entities.Product, er
 	}
 
 	return products, nil
+}
+
+func (r *ProductRepository) GetById(ctx context.Context, id primitive.ObjectID) (*entities.Product, error) {
+	var product entities.Product
+	filter := bson.M{"_id": id}
+
+	err := r.collection.FindOne(ctx, filter).Decode(&product)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("product not found")
+		}
+		return nil, err
+	}
+
+	return &product, nil
 }

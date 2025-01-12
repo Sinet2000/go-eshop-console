@@ -1,15 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
-	db "github.com/Sinet2000/go-eshop-console/internal/data"
-	"github.com/Sinet2000/go-eshop-console/internal/entities"
+	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/services"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
+	"github.com/Sinet2000/go-eshop-console/tables"
 	"github.com/Sinet2000/go-eshop-console/views"
 )
 
@@ -31,9 +32,6 @@ func main() {
 	}
 
 	adminName := "root"
-
-	addNewProduct(&productStock)
-	views.ShowProductTable(productStock)
 
 	fmt.Println()
 	fmt.Println()
@@ -59,6 +57,9 @@ func main() {
 		switch choice {
 		case 1:
 			logger.PrintlnColoredText("📜 List Products", logger.GreenTxtColorCode)
+			tables.ListProducts(productStock)
+		case 2:
+			ShowProductDetailsById(productService, ctx)
 		case 0:
 			logger.PrintlnColoredText("🛑 Quit", logger.GreenTxtColorCode)
 			fmt.Println("Goodbye! 👋")
@@ -72,19 +73,35 @@ func main() {
 	}
 }
 
-func addNewProduct(productStock *[]entities.Product) {
-	newProduct, err := entities.CreateProduct(
-		len(*productStock)-1,
-		"Apple MacBook Pro 14-inch",
-		"AMP14-001",
-		"A high-performance laptop with Apple's M1 Pro chip, featuring a stunning Retina display and long-lasting battery life.",
-		1299.99, 45, "")
+func ShowProductDetailsById(service *services.ProductService, ctx context.Context) {
+	var inputId string
+	fmt.Println("Enter the product ID to get details:")
+	fmt.Scanln(&inputId)
+
+	product, err := service.GetProductById(ctx, inputId)
 	if err != nil {
-		logger.PrintColoredText("❗An error occurred: ", logger.RedTxtColorCode)
-		fmt.Println(err)
+		fmt.Println("Error:", err)
 		return
 	}
 
-	// Append the new product to the stock
-	*productStock = append(*productStock, *newProduct)
+	// Show product details
+	fmt.Printf("Product Details:\nID: %s\nName: %s\nSKU: %s\nPrice: %.2f\n",
+		product.ID.Hex(), product.Name, product.SKU, product.Price)
 }
+
+// func addNewProduct(productStock *[]entities.Product) {
+// 	newProduct, err := entities.CreateProduct(
+// 		len(*productStock)-1,
+// 		"Apple MacBook Pro 14-inch",
+// 		"AMP14-001",
+// 		"A high-performance laptop with Apple's M1 Pro chip, featuring a stunning Retina display and long-lasting battery life.",
+// 		1299.99, 45, "")
+// 	if err != nil {
+// 		logger.PrintColoredText("❗An error occurred: ", logger.RedTxtColorCode)
+// 		fmt.Println(err)
+// 		return
+// 	}
+
+// 	// Append the new product to the stock
+// 	*productStock = append(*productStock, *newProduct)
+// }

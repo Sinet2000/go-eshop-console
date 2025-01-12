@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -14,8 +13,6 @@ import (
 	"github.com/Sinet2000/go-eshop-console/views"
 )
 
-const productsFilePath = "data/products.json"
-
 func main() {
 	dbClient, ctx := db.ConnectToDb()
 	defer func() {
@@ -27,28 +24,6 @@ func main() {
 	productRepo := db.NewProductRepository(dbClient.Database(os.Getenv("MONGO_DB_NAME")))
 	productService := services.NewProductService(productRepo)
 
-	// Count the products in the collection
-	count, err := productRepo.CountProducts(ctx)
-	if err != nil {
-		log.Fatalf("Error counting products: %v", err)
-	}
-
-	if count == 0 {
-		fmt.Println("Seeding the database with products...")
-		products, err := readProductsFromFile(productsFilePath)
-		if err != nil {
-			logger.PrintColoredText("❗An error occurred: ", logger.RedTxtColorCode)
-			fmt.Println(err)
-			return
-		}
-		err = productService.Seed(ctx, products)
-		if err != nil {
-			logger.PrintColoredText("❗An error occurred while seeding: ", logger.RedTxtColorCode)
-			fmt.Println(err)
-			return
-		}
-	}
-
 	// Fetch and display all products
 	productStock, err := productService.ListAllProducts(ctx)
 	if err != nil {
@@ -57,19 +32,7 @@ func main() {
 
 	adminName := "root"
 
-	newProduct, err := entities.CreateProduct(
-		len(productStock)-1,
-		"Apple MacBook Pro 14-inch",
-		"AMP14-001",
-		"A high-performance laptop with Apple's M1 Pro chip, featuring a stunning Retina display and long-lasting battery life.",
-		1299.99, 45, "")
-	if err != nil {
-		logger.PrintColoredText("❗An error occurred: ", logger.RedTxtColorCode)
-		fmt.Println(err)
-	}
-
-	productStock = append(productStock, *newProduct)
-
+	addNewProduct(&productStock)
 	views.ShowProductTable(productStock)
 
 	fmt.Println()
@@ -90,6 +53,9 @@ func main() {
 			continue
 		}
 
+		fmt.Println("\nPress Enter to continue...")
+		fmt.Scanln()
+
 		switch choice {
 		case 1:
 			logger.PrintlnColoredText("📜 List Products", logger.GreenTxtColorCode)
@@ -100,31 +66,25 @@ func main() {
 		default:
 			fmt.Println("❗Invalid choice. Please try again. ❗")
 		}
+
+		fmt.Println("\nPress Enter to continue...")
+		fmt.Scanln()
 	}
 }
 
-func readProductsFromFile(filePath string) ([]entities.Product, error) {
-	file, err := os.Open(filePath)
+func addNewProduct(productStock *[]entities.Product) {
+	newProduct, err := entities.CreateProduct(
+		len(*productStock)-1,
+		"Apple MacBook Pro 14-inch",
+		"AMP14-001",
+		"A high-performance laptop with Apple's M1 Pro chip, featuring a stunning Retina display and long-lasting battery life.",
+		1299.99, 45, "")
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	// Read the entire file content into a byte slice
-	fileContent, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Create a slice to hold products
-	var products []entities.Product
-
-	// Unmarshal JSON into the products slice
-	err = json.Unmarshal(fileContent, &products)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		logger.PrintColoredText("❗An error occurred: ", logger.RedTxtColorCode)
+		fmt.Println(err)
+		return
 	}
 
-	// Return the populated slice of products
-	return products, nil
+	// Append the new product to the stock
+	*productStock = append(*productStock, *newProduct)
 }

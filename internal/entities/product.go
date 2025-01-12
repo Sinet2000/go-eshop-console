@@ -1,24 +1,28 @@
-package models
+package entities
 
 import (
 	"fmt"
 
-	"github.com/Sinet2000/go-eshop-console/domain/exceptions"
+	"github.com/Sinet2000/go-eshop-console/exceptions"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Product struct {
-	ID          int
-	Name        string
-	Description string // Detailed description of the product
-	SKU         string
-	Price       float32
-	Stock       int
-	ImageURL    string
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name        string             `json:"name" bson:"name"`
+	Description string             `json:"description" bson:"description"`
+	SKU         string             `json:"sku" bson:"sku"`
+	Price       float32            `json:"price" bson:"price"`
+	Stock       int                `json:"stock" bson:"stock"`
+	ImageURL    string             `json:"imageUrl" bson:"imageUrl"`
 }
 
-func NewProduct(id int, name, description string, price float32, stock int, imageURL string) (*Product, error) {
+func CreateProduct(name, sku, description string, price float32, stock int, imageURL string) (*Product, error) {
 	if name == "" {
 		return nil, &exceptions.DomainException{Message: "Product name cannot be empty"}
+	}
+	if sku == "" {
+		return nil, &exceptions.DomainException{Message: "SKU cannot be empty"}
 	}
 	if price <= 0 {
 		return nil, &exceptions.DomainException{Message: "Price must be a positive value"}
@@ -28,8 +32,8 @@ func NewProduct(id int, name, description string, price float32, stock int, imag
 	}
 
 	product := &Product{
-		ID:          id,
 		Name:        name,
+		SKU:         sku,
 		Description: description,
 		Price:       price,
 		Stock:       stock,

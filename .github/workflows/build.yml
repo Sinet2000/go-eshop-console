@@ -40,5 +40,5 @@ jobs:
         run: go build -o app ./main.go
 
       # Run Go app
-      - name: Run Go app
-        run: ./app
+      # - name: Run Go app
+      #   run: ./app

@@ -1,14 +1,26 @@
-# Build
-FROM golang:1.22 AS builder
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-RUN go build -o main ./main.go
+# Start with a Go base image
+FROM golang:1.20-alpine as builder
 
-# Run stage
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod tidy
+
+COPY . .
+
+# Build the Go application
+RUN CGO_ENABLED=0 GOOS=linux go build -o go-eshop-console .
+
 FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/main .
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app
+
+COPY --from=builder /app/go-eshop-console .
+
+COPY .env .env
+
 EXPOSE 8080
-CMD ["./main"]
+
+CMD ["./go-eshop-console"]

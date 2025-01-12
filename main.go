@@ -5,42 +5,52 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	// Load environment variables
+	connectToDb()
+}
+
+func connectToDb() {
+	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	// Get MongoDB configuration from environment variables
 	mongoURI := os.Getenv("MONGO_URI")
-	dbName := os.Getenv("MONGO_DB_NAME")
+	mongoUser := os.Getenv("MONGO_USER")
+	mongoPassword := os.Getenv("MONGO_PASSWORD")
+	mongoAuthSource := os.Getenv("MONGO_AUTH_SOURCE")
 
-	// Connect to MongoDB
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(mongoURI).SetServerAPIOptions(serverAPI)
-	client, err := mongo.Connect(context.TODO(), opts)
-	if err != nil {
-		log.Fatalf("Failed to create MongoDB client: %v", err)
+	credential := options.Credential{
+		AuthSource: mongoAuthSource,
+		Username:   mongoUser,
+		Password:   mongoPassword,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	clientOptions := options.Client().ApplyURI(mongoURI).SetAuth(credential)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 
-	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
+		log.Fatalf("Error connecting to MongoDB: %v", err)
 	}
-	defer client.Disconnect(ctx)
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			log.Fatalf("Error disconnecting from MongoDB: %v", err)
+		}
+	}()
 
-	// Test the connection
-	db := client.Database(dbName)
-	fmt.Printf("Connected to MongoDB database: %s\n", db.Name())
+	// Send a ping to confirm successful connection
+	var result bson.M
+	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
+		log.Fatalf("Error pinging MongoDB: %v", err)
+	}
+
+	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 }

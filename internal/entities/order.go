@@ -1,18 +1,10 @@
-<<<<<<<< HEAD:internal/entities/order.go
 package entities
-========
-package order_scope
->>>>>>>> ca972b1 (#WSC-3: Product seeding & menu output & improved structure):modules/order/order.go
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/Sinet2000/go-eshop-console/exceptions"
-<<<<<<<< HEAD:internal/entities/order.go
-========
-	product_scope "github.com/Sinet2000/go-eshop-console/modules/product"
->>>>>>>> ca972b1 (#WSC-3: Product seeding & menu output & improved structure):modules/order/order.go
 )
 
 type OrderStatus int
@@ -34,11 +26,11 @@ type Order struct {
 	ID           int
 	CustomerID   int
 	Status       OrderStatus
-	TotalPrice   float64
+	TotalPrice   float32
 	Currency     string
 	OrderDate    time.Time
 	ShippingDate time.Time
-	Products     []product_scope.Product
+	Products     []Product
 }
 
 func CreateOrder(customerID int, currency string) (*Order, error) {
@@ -51,7 +43,7 @@ func CreateOrder(customerID int, currency string) (*Order, error) {
 		Status:     Pending,
 		Currency:   currency,
 		OrderDate:  time.Now(),
-		Products:   []product_scope.Product{},
+		Products:   []Product{},
 	}
 
 	return order, nil
@@ -84,8 +76,8 @@ func (o *Order) CanChangeStatusTo(newStatus OrderStatus) bool {
 	return false
 }
 
-func (o *Order) CalculateTotalPrice() float64 {
-	var total float64
+func (o *Order) CalculateTotalPrice() float32 {
+	var total float32
 	for _, product := range o.Products {
 		total += product.Price
 	}

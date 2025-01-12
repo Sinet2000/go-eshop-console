@@ -3,11 +3,10 @@ package logger
 import "fmt"
 
 const (
-	SuccessColor = "\033[32m"
-	ErrorColor   = "\033[31m"
-	WarningColor = "\033[33m"
-	GrayColor    = "\033[90m"
-	ResetColor   = "\033[0m"
+	GreenTxtColorCode = "\033[32m"
+	RedTxtColorCode   = "\033[31m"
+	GrayTxtColorCode  = "\033[90m"
+	ResetTxtColorCode = "\033[0m"
 )
 
 func clearScreen() {

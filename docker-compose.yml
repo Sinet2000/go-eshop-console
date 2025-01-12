@@ -1,14 +1,4 @@
 # docker exec -it <container-name> /bin/sh
-# docker-compose up -d postgresql adminer  # If you want to ignore MongoDB
-
-networks:
-  commerce-hub-network:
-    driver: bridge
-
-volumes:
-  commerce-hub-go-mongodb-data:
-  commerce-hub-go-pg-data:
-
 services:
   # go-shop-console:
   #   build:
@@ -22,40 +12,10 @@ services:
 
   mongodb:
     image: mongodb/mongodb-community-server:latest
-    container_name: commerce-hub-go-mongodb
+    container_name: mongod
     restart: always
     environment:
       MONGODB_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGODB_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
       - "27017:27017"
-    volumes:
-      - commerce-hub-go-mongodb-data:/data/db
-    networks:
-      - commerce-hub-network
-
-  postgresql:
-    image: postgres:latest
-    container_name: commerce-hub-go-pg
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    volumes:
-      - commerce-hub-go-pg-data:/var/lib/postgresql/data
-    networks:
-      - commerce-hub-network
-
-  adminer:
-    image: adminer:latest
-    container_name: commerce-hub-go-adminer
-    restart: always
-    environment:
-      ADMINER_DEFAULT_SERVER: commerce-hub-go-postgresql
-    ports:
-      - "8080:8080"
-    networks:
-      - commerce-hub-network

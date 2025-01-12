@@ -4,19 +4,20 @@ import (
 	"fmt"
 
 	"github.com/Sinet2000/go-eshop-console/exceptions"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Product struct {
-	ID          int     `json:"id" bson:"id"`
-	Name        string  `json:"name" bson:"name"`
-	Description string  `json:"description" bson:"description"`
-	SKU         string  `json:"sku" bson:"sku"`
-	Price       float32 `json:"price" bson:"price"`
-	Stock       int     `json:"stock" bson:"stock"`
-	ImageURL    string  `json:"imageUrl" bson:"imageUrl"`
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name        string             `json:"name" bson:"name"`
+	Description string             `json:"description" bson:"description"`
+	SKU         string             `json:"sku" bson:"sku"`
+	Price       float32            `json:"price" bson:"price"`
+	Stock       int                `json:"stock" bson:"stock"`
+	ImageURL    string             `json:"imageUrl" bson:"imageUrl"`
 }
 
-func CreateProduct(id int, name, sku, description string, price float32, stock int, imageURL string) (*Product, error) {
+func CreateProduct(name, sku, description string, price float32, stock int, imageURL string) (*Product, error) {
 	if name == "" {
 		return nil, &exceptions.DomainException{Message: "Product name cannot be empty"}
 	}
@@ -31,7 +32,6 @@ func CreateProduct(id int, name, sku, description string, price float32, stock i
 	}
 
 	product := &Product{
-		ID:          id,
 		Name:        name,
 		SKU:         sku,
 		Description: description,

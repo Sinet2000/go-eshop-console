@@ -7,10 +7,11 @@ import (
 	"log"
 
 	"github.com/Sinet2000/go-eshop-console/config"
-	db "github.com/Sinet2000/go-eshop-console/internal/data"
+	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/entities"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/file_reader"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ProductService struct {
@@ -23,6 +24,20 @@ func NewProductService(repo *db.ProductRepository) *ProductService {
 
 func (s *ProductService) ListAllProducts(ctx context.Context) ([]entities.Product, error) {
 	return s.repo.ListAll(ctx)
+}
+
+func (s *ProductService) GetProductById(ctx context.Context, id string) (*entities.Product, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid ID format: %v", err)
+	}
+
+	product, err := s.repo.GetById(ctx, objectID)
+	if err != nil {
+		return nil, fmt.Errorf("product not found: %v", err)
+	}
+
+	return product, nil
 }
 
 func (s *ProductService) Seed(ctx context.Context) error {

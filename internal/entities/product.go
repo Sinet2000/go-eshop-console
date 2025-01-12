@@ -1,4 +1,4 @@
-package product_scope
+package entities
 
 import (
 	"fmt"
@@ -7,13 +7,13 @@ import (
 )
 
 type Product struct {
-	ID          int     `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	SKU         string  `json:"sku"`
-	Price       float32 `json:"price"`
-	Stock       int     `json:"stock"`
-	ImageURL    string  `json:"imageUrl"`
+	ID          int     `json:"id" bson:"id"`
+	Name        string  `json:"name" bson:"name"`
+	Description string  `json:"description" bson:"description"`
+	SKU         string  `json:"sku" bson:"sku"`
+	Price       float32 `json:"price" bson:"price"`
+	Stock       int     `json:"stock" bson:"stock"`
+	ImageURL    string  `json:"imageUrl" bson:"imageUrl"`
 }
 
 func CreateProduct(id int, name, sku, description string, price float32, stock int, imageURL string) (*Product, error) {

@@ -1,13 +1,14 @@
-package product_scope
+package views
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/Sinet2000/go-eshop-console/internal/entities"
 	"github.com/olekukonko/tablewriter"
 )
 
-func PrintProductTable(products []Product) {
+func ShowProductTable(products []entities.Product) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetCaption(true, "WSC - Products Stock 📦")
 	table.SetHeader([]string{"ID", "Name", "SKU", "Price"})

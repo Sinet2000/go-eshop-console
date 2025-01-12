@@ -1,0 +1,21 @@
+# docker exec -it <container-name> /bin/sh
+services:
+  # go-shop-console:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - mongodb
+  #   environment:
+  #     - MONGO_URI=mongodb://root:P@ssw0rd!23@mongodb:27017/shopGo
+  #   tty: true # Enables interactive mode for console apps
+
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongod
+    restart: always
+    environment:
+      MONGODB_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGODB_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"

@@ -1,11 +1,10 @@
-package order_scope
+package entities
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/Sinet2000/go-eshop-console/exceptions"
-	product_scope "github.com/Sinet2000/go-eshop-console/modules/product"
 )
 
 type OrderStatus int
@@ -31,7 +30,7 @@ type Order struct {
 	Currency     string
 	OrderDate    time.Time
 	ShippingDate time.Time
-	Products     []product_scope.Product
+	Products     []Product
 }
 
 func CreateOrder(customerID int, currency string) (*Order, error) {
@@ -44,7 +43,7 @@ func CreateOrder(customerID int, currency string) (*Order, error) {
 		Status:     Pending,
 		Currency:   currency,
 		OrderDate:  time.Now(),
-		Products:   []product_scope.Product{},
+		Products:   []Product{},
 	}
 
 	return order, nil

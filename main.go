@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
+	"github.com/Sinet2000/go-eshop-console/config"
 	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/services"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
@@ -15,21 +15,27 @@ import (
 )
 
 func main() {
-	dbClient, ctx := db.ConnectToDb()
+	_, err := db.NewPgService()
+	if err != nil {
+		log.Fatalf("Failed to connect to PostgreSQL Db: %v", err)
+	}
+
+	mongoDbContext, err := db.NewMongoService(config.GetEnv("MONGO_DB_NAME"))
+	if err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+
 	defer func() {
-		if err := dbClient.Disconnect(ctx); err != nil {
-			log.Fatalf("Error disconnecting from MongoDB: %v", err)
+		if err := mongoDbContext.Close(); err != nil {
+			log.Printf("Error during MongoDB closure: %v", err)
 		}
 	}()
 
-	productRepo := db.NewProductRepository(dbClient.Database(os.Getenv("MONGO_DB_NAME")))
-	productService := services.NewProductService(productRepo)
+	productRepo := db.NewProductRepository(mongoDbContext.DB)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	// Fetch and display all products
-	productStock, err := productService.ListAllProducts(ctx)
-	if err != nil {
-		log.Fatalf("Error fetching products: %v", err)
-	}
+	productService := services.NewProductService(productRepo)
 
 	adminName := "root"
 
@@ -40,7 +46,7 @@ func main() {
 
 		fmt.Println("WSC - Product Management 🛠️")
 		fmt.Printf("Hello %s - %s\n", adminName, currentTime)
-		views.ShowMainMenu()
+		views.DisplayMainMenu()
 
 		var choice int
 		fmt.Printf("\nSelect an option: ")
@@ -55,15 +61,39 @@ func main() {
 		fmt.Scanln()
 
 		switch choice {
-		case 1:
-			logger.PrintlnColoredText("📜 List Products", logger.GreenTxtColorCode)
-			tables.ListProducts(productStock)
-		case 2:
-			ShowProductDetailsById(productService, ctx)
 		case 0:
 			logger.PrintlnColoredText("🛑 Quit", logger.GreenTxtColorCode)
 			fmt.Println("Goodbye! 👋")
+
 			return
+		case 1:
+			logger.PrintlnColoredText("📜 List Products", logger.GreenTxtColorCode)
+
+			productStock, err := productService.ListAllProducts(ctx)
+			if err != nil {
+				log.Fatalf("Error fetching products: %v", err)
+			}
+
+			tables.ListProducts(productStock)
+		case 2:
+
+			var productID string
+			fmt.Printf("\nEnter the product ID:")
+			_, err = fmt.Scan(&productID)
+			if err != nil {
+				logger.PrintlnColoredText("❗ Invalid input. Please enter valid product ID ❗", logger.RedTxtColorCode)
+				continue
+			}
+
+			productDetails, err := productService.GetProductById(ctx, productID)
+			if err != nil {
+				fmt.Println("Error:", err)
+				continue
+			}
+
+			views.DisplayProductDetails(productDetails)
+		case 6:
+			productService.Seed(ctx)
 		default:
 			fmt.Println("❗Invalid choice. Please try again. ❗")
 		}
@@ -72,36 +102,3 @@ func main() {
 		fmt.Scanln()
 	}
 }
-
-func ShowProductDetailsById(service *services.ProductService, ctx context.Context) {
-	var inputId string
-	fmt.Println("Enter the product ID to get details:")
-	fmt.Scanln(&inputId)
-
-	product, err := service.GetProductById(ctx, inputId)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	// Show product details
-	fmt.Printf("Product Details:\nID: %s\nName: %s\nSKU: %s\nPrice: %.2f\n",
-		product.ID.Hex(), product.Name, product.SKU, product.Price)
-}
-
-// func addNewProduct(productStock *[]entities.Product) {
-// 	newProduct, err := entities.CreateProduct(
-// 		len(*productStock)-1,
-// 		"Apple MacBook Pro 14-inch",
-// 		"AMP14-001",
-// 		"A high-performance laptop with Apple's M1 Pro chip, featuring a stunning Retina display and long-lasting battery life.",
-// 		1299.99, 45, "")
-// 	if err != nil {
-// 		logger.PrintColoredText("❗An error occurred: ", logger.RedTxtColorCode)
-// 		fmt.Println(err)
-// 		return
-// 	}
-
-// 	// Append the new product to the stock
-// 	*productStock = append(*productStock, *newProduct)
-// }

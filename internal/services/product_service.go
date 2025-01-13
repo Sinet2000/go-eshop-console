@@ -70,6 +70,8 @@ func (s *ProductService) Seed(ctx context.Context) error {
 		return fmt.Errorf("error inserting products: %w", err)
 	}
 
+	logger.PrintColoredText("The DB is seeded with the products ...", logger.GrayTxtColorCode)
+
 	return nil
 }
 

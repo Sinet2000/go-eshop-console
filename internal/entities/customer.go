@@ -14,15 +14,15 @@ const (
 )
 
 type Customer struct {
-	ID           int
+	ID           uint `gorm:"primaryKey"`
 	FirstName    string
 	LastName     string
 	CompanyName  string
 	CustomerType CustomerType
-	ContactInfo  ContactInfo
+	// ContactInfo  ContactInfo
 }
 
-func NewCustomer(id int, customerType CustomerType, firstName, lastName, companyName string, contactInfo ContactInfo) (*Customer, error) {
+func NewCustomer(id uint, customerType CustomerType, firstName, lastName, companyName string, contactInfo ContactInfo) (*Customer, error) {
 	// Validate for Person (Individual)
 	if customerType == Individual {
 		if firstName == "" || lastName == "" {
@@ -43,7 +43,7 @@ func NewCustomer(id int, customerType CustomerType, firstName, lastName, company
 		FirstName:    firstName,
 		LastName:     lastName,
 		CompanyName:  companyName,
-		ContactInfo:  contactInfo,
+		// ContactInfo:  contactInfo,
 	}
 
 	return customer, nil
@@ -56,15 +56,15 @@ func (c *Customer) GetFullNameOrCompany() string {
 	return c.CompanyName
 }
 
-func (c *Customer) GetCustomerInfo() string {
-	if c.CustomerType == Individual {
-		return fmt.Sprintf("Customer ID: %d\nName: %s\nEmail: %s\nPhone: %s\nAddress: %s",
-			c.ID, c.GetFullNameOrCompany(), c.ContactInfo.Email, c.ContactInfo.PhoneNumber, c.ContactInfo.Address)
-	}
-	return fmt.Sprintf("Customer ID: %d\nCompany Name: %s\nEmail: %s\nPhone: %s\nAddress: %s",
-		c.ID, c.GetFullNameOrCompany(), c.ContactInfo.Email, c.ContactInfo.PhoneNumber, c.ContactInfo.Address)
-}
+// func (c *Customer) UpdateContactInfo(newContactInfo ContactInfo) {
+// 	c.ContactInfo = newContactInfo
+// }
 
-func (c *Customer) UpdateContactInfo(newContactInfo ContactInfo) {
-	c.ContactInfo = newContactInfo
-}
+// func (c *Customer) String() string {
+// 	if c.CustomerType == Individual {
+// 		return fmt.Sprintf("Customer ID: %d\nName: %s\nEmail: %s\nPhone: %s\nAddress: %s",
+// 			c.ID, c.GetFullNameOrCompany(), c.ContactInfo.Email, c.ContactInfo.PhoneNumber, c.ContactInfo.Address)
+// 	}
+// 	return fmt.Sprintf("Customer ID: %d\nCompany Name: %s\nEmail: %s\nPhone: %s\nAddress: %s",
+// 		c.ID, c.GetFullNameOrCompany(), c.ContactInfo.Email, c.ContactInfo.PhoneNumber, c.ContactInfo.Address)
+// }

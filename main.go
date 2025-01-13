@@ -3,34 +3,24 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/Sinet2000/go-eshop-console/config"
-	"github.com/Sinet2000/go-eshop-console/handlers"
-	"github.com/Sinet2000/go-eshop-console/internal/db"
-	"github.com/Sinet2000/go-eshop-console/internal/utils"
-	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
 	"log"
+	"time"
+
+	"github.com/Sinet2000/go-eshop-console/config"
+	"github.com/Sinet2000/go-eshop-console/internal/db"
+	"github.com/Sinet2000/go-eshop-console/internal/services"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
+	"github.com/Sinet2000/go-eshop-console/tables"
+	"github.com/Sinet2000/go-eshop-console/views"
 )
 
 func main() {
-	isAdmin, err := utils.Confirm("Are you admin?")
+	_, err := db.NewPgService()
 	if err != nil {
-		log.Fatalf("Error: %v", err)
-	}
-	if !isAdmin {
-		logger.PrintlnColoredText("UNAUTHORISED", logger.ErrorColor)
-		return
+		log.Fatalf("Failed to connect to PostgreSQL Db: %v", err)
 	}
 
-	config.LoadConfig()
-	//_, err = db.NewPgService()
-	// if err != nil {
-	//	log.Fatalf("Failed to connect to PostgreSQL Db: %v", err)
-	// }
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	mongoDbContext, err := db.NewMongoService(config.GetEnv("MONGO_DB_NAME"), ctx)
+	mongoDbContext, err := db.NewMongoService(config.GetEnv("MONGO_DB_NAME"))
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
@@ -42,17 +32,73 @@ func main() {
 	}()
 
 	productRepo := db.NewProductRepository(mongoDbContext.DB)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	productService := services.NewProductService(productRepo)
+
+	adminName := "root"
 
 	fmt.Println()
-
+	fmt.Println()
 	for {
-		adminMenuHandler := handlers.NewAdminHandler(productRepo)
-		isExit := adminMenuHandler.RunAdminMenu(ctx)
+		currentTime := time.Now().Format("2006-01-02 15:04")
 
-		if isExit {
-			logger.PrintlnColoredText("Quit 🚪", logger.SuccessColor)
-			fmt.Println("Goodbye! 👋")
-			break
+		fmt.Println("WSC - Product Management 🛠️")
+		fmt.Printf("Hello %s - %s\n", adminName, currentTime)
+		views.DisplayMainMenu()
+
+		var choice int
+		fmt.Printf("\nSelect an option: ")
+		_, err := fmt.Scan(&choice)
+
+		if err != nil {
+			logger.PrintlnColoredText("❗ Invalid input. Please enter a number between 0 and 5. ❗", logger.RedTxtColorCode)
+			continue
 		}
+
+		fmt.Println("\nPress Enter to continue...")
+		fmt.Scanln()
+
+		switch choice {
+		case 0:
+			logger.PrintlnColoredText("🛑 Quit", logger.GreenTxtColorCode)
+			fmt.Println("Goodbye! 👋")
+
+			return
+		case 1:
+			logger.PrintlnColoredText("📜 List Products", logger.GreenTxtColorCode)
+
+			productStock, err := productService.ListAllProducts(ctx)
+			if err != nil {
+				log.Fatalf("Error fetching products: %v", err)
+			}
+
+			tables.ListProducts(productStock)
+		case 2:
+
+			var productID string
+			fmt.Printf("\nEnter the product ID:")
+			_, err = fmt.Scan(&productID)
+			if err != nil {
+				logger.PrintlnColoredText("❗ Invalid input. Please enter valid product ID ❗", logger.RedTxtColorCode)
+				continue
+			}
+
+			productDetails, err := productService.GetProductById(ctx, productID)
+			if err != nil {
+				fmt.Println("Error:", err)
+				continue
+			}
+
+			views.DisplayProductDetails(productDetails)
+		case 6:
+			productService.Seed(ctx)
+		default:
+			fmt.Println("❗Invalid choice. Please try again. ❗")
+		}
+
+		fmt.Println("\nPress Enter to continue...")
+		fmt.Scanln()
 	}
 }

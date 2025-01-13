@@ -12,7 +12,6 @@ import (
 func DisplayProductDetails(product *entities.Product) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"", ""})
-	table.SetBorder(true)
 
 	table.Append([]string{"ID", product.ID.Hex()})
 	table.Append([]string{"SKU", product.SKU})
@@ -20,6 +19,4 @@ func DisplayProductDetails(product *entities.Product) {
 	table.Append([]string{"Description", product.Description})
 	table.Append([]string{"Price", fmt.Sprintf("%.2f", product.Price)})
 	table.Append([]string{"Stock", strconv.Itoa(product.Stock)})
-
-	table.Render()
 }

@@ -14,6 +14,8 @@ import (
 	"github.com/Sinet2000/go-eshop-console/views"
 )
 
+const productsFilePath = "data/products.json"
+
 func main() {
 	_, err := db.NewPgService()
 	if err != nil {

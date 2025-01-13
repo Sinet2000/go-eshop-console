@@ -1,6 +1,67 @@
-## Project Structure
+## Commands
+### Go commands
+```bash
+# Initialize a new Go module in the current directory
+go mod init <module-name>
+
+# Add a dependency to the module
+go get <package-name>
+go get -u <package-name>@none
+
+# Remove unused dependencies and tidy up go.mod and go.sum
+go mod tidy
+
+# Build the Go project
+go build
+
+# Force-update all dependencies to their latest versions
+go get -u ./...
+
+# View a graph of module dependencies
+go mod graph
+
+# Verify dependencies against go.sum
+go mod verify
+
+# Run a Go program
+go run <file>.go
+
+# Run tests in the current directory
+go test ./...
+
+# Clean up the build cache
+go clean -cache
+
+# Clean up the module cache
+go clean -modcache
+
+# List all installed Go packages
+go list all
+
+# Format Go source code
+go fmt ./...
+
+# View documentation for a package
+go doc <package>
+
+# Download all dependencies
+go mod download
+
+# Install a Go tool (e.g., golangci-lint, staticcheck)
+go install <tool>@latest
+
+# Check for any linting issues
+golangci-lint run
+
+# Run static analysis on your code
+staticcheck ./...
 
 ```
+---
+
+## Project Structure
+
+```bash
 go-eshop-console/
 ├── go.mod                # Go module file
 ├── go.sum                # Dependency checksum file
@@ -34,7 +95,7 @@ go-eshop-console/
 ## App Highlights
 
 ### Example: Admin Menu:
-```
+```bash
 Admin Menu - [yyyy/MM/dd HH:mm]
 ---------------------------------  
 Name: ...
@@ -55,7 +116,7 @@ Select an option: _
 
 ### Example: Customer Menu
 
-```
+```bash
 Hello [Customer name] - [yyyy/MM/dd HH:mm]
 ---------------------------------  
 Name: ...
@@ -72,7 +133,7 @@ Customer Menu:
 ```
 
 ### Example: Pagination Workflow:
-```
+```bash
 Admin: View All Orders (Page 1)  
 ---------------------------------  
 Order ID: 1 | Status: Pending ... 

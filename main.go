@@ -49,7 +49,7 @@ func main() {
 	for {
 		views.DispalyAdminMenu()
 
-		choice, err := utils.GetUserSelectedOption()
+		choice, err := utils.PromptUserForSelection()
 		if err != nil {
 			log.Printf("Error: %v\n", err)
 			return

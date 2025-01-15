@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log"
 	"time"
 
@@ -17,7 +16,7 @@ type MongoDbContext struct {
 	DB     *mongo.Database
 }
 
-func NewMongoService(dbName string, ctx context.Context) (*MongoDbContext, error) {
+func NewMongoService(dbName string) (*MongoDbContext, error) {
 	config.LoadConfig()
 
 	mongoURI := config.GetEnv("MONGO_URI")
@@ -31,22 +30,25 @@ func NewMongoService(dbName string, ctx context.Context) (*MongoDbContext, error
 		Password:   mongoPassword,
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(mongoURI).SetAuth(credential).SetServerAPIOptions(serverAPI)
 	client, err := mongo.Connect(ctx, opts)
 
 	if err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
-		return nil, err
+		panic(err)
 	}
 
-	if err := ensureHealthy(client, ctx); err != nil {
+	if err := ensureHealthy(client); err != nil {
 		// If ping fails, disconnect to avoid leaving the client in an inconsistent state
 		_ = client.Disconnect(context.Background())
 		return nil, err
 	}
 
-	logger.PrintlnColoredText("Successfully connected to MongoDB!", logger.SuccessColor)
+	logger.PrintlnColoredText("Successfully connected to MongoDB!", logger.GreenTxtColorCode)
 	return &MongoDbContext{
 		Client: client,
 		DB:     client.Database(dbName),
@@ -62,15 +64,26 @@ func (m *MongoDbContext) Close() error {
 		return err
 	}
 
-	logger.PrintlnColoredText("Disconnected from MongoDB!", logger.GrayColor)
+	logger.PrintlnColoredText("Disconnected from MongoDB!", logger.GrayTxtColorCode)
 	return nil
 }
 
-func ensureHealthy(client *mongo.Client, ctx context.Context) error {
-	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+// EnsureIsHealthy provides a health check for the database (public function).
+func EnsureIsHealthy(client *mongo.Client) bool {
+	err := ensureHealthy(client)
+	return err == nil
+}
+
+func ensureHealthy(client *mongo.Client) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := client.Ping(ctx, nil)
+	if err != nil {
+		log.Printf("Database status check failed: %v", err)
 		return err
 	}
 
-	logger.PrintlnColoredText("Database is healthy!", logger.SuccessColor)
+	logger.PrintlnColoredText("Database is healthy!", logger.GreenTxtColorCode)
 	return nil
 }

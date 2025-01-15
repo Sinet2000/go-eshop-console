@@ -5,12 +5,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/Sinet2000/go-eshop-console/config"
 	"github.com/olekukonko/tablewriter"
 )
 
-func DisplayAdminMenu() {
+func DispalyAdminMenu() {
+	fmt.Println("WSC - Admin Menu 🛠️")
 	currentTime := time.Now().Format("2006-01-02 15:04")
-	fmt.Printf("WSC - Product Management 🛠️ - %s\n", currentTime)
+	fmt.Printf("Hello %s - %s\n", config.GetEnv("ADMIN_NAME"), currentTime)
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"", ""})

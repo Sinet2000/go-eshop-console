@@ -36,13 +36,13 @@ func Confirm(confirmPrompt string) (bool, error) {
 	}
 }
 
-func PromptIntInput(promptMessage string) (int, error) {
-	fmt.Printf(promptMessage)
+func GetUserSelectedOption() (int, error) {
+	fmt.Printf("\nSelect an option: ")
 	reader := bufio.NewReader(os.Stdin)
 
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		logger.PrintlnColoredText("❗ Failed to read input. Please try again. ❗", logger.ErrorColor)
+		logger.PrintlnColoredText("❗ Failed to read input. Please try again. ❗", logger.RedTxtColorCode)
 		return 0, err
 	}
 
@@ -50,27 +50,12 @@ func PromptIntInput(promptMessage string) (int, error) {
 
 	choice, err := strconv.Atoi(input)
 	if err != nil {
-		logger.PrintlnColoredText("❗ Invalid input. Please enter a valid number. ❗", logger.ErrorColor)
+		logger.PrintlnColoredText("❗ Invalid input. Please enter a valid number. ❗", logger.RedTxtColorCode)
 		return 0, fmt.Errorf("invalid input: %w", err)
 	}
 
-	// fmt.Println("\nPress Enter to continue...")
-	// fmt.Scanln()
+	fmt.Println("\nPress Enter to continue...")
+	fmt.Scanln()
 
 	return choice, nil
-}
-
-func PromptStrInput(promptMessage string) (string, error) {
-	fmt.Printf(promptMessage)
-	reader := bufio.NewReader(os.Stdin)
-
-	input, err := reader.ReadString('\n')
-	if err != nil {
-		logger.PrintlnColoredText("❗ Failed to read input. Please try again. ❗", logger.ErrorColor)
-		return "", err
-	}
-
-	input = strings.TrimSpace(input)
-
-	return input, nil
 }

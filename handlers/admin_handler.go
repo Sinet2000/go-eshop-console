@@ -5,7 +5,6 @@ import (
 
 	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/services"
-	"github.com/Sinet2000/go-eshop-console/views"
 )
 
 type AdminHandler struct {
@@ -19,9 +18,11 @@ func NewAdminHandler(productRepo *db.ProductRepository) *AdminHandler {
 }
 
 func (h *AdminHandler) HandleAdminMenu(option int) bool {
+	productHandler := NewProductMngmtHandler(h.productService)
+
 	switch option {
 	case 1:
-		h.handleManageProducts()
+		productHandler.HandleAdminManageProducts()
 		return false
 	case 2:
 		handleManageOrders()
@@ -41,10 +42,6 @@ func (h *AdminHandler) HandleAdminMenu(option int) bool {
 		fmt.Println("Invalid selection. Please try again.")
 		return false
 	}
-}
-
-func (h *AdminHandler) handleManageProducts() {
-	views.DisplayAdminProductMngmtMenu()
 }
 
 // handleManageOrders handles actions related to order management.

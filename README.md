@@ -96,7 +96,8 @@ go-eshop-console/
 
 ### Example: Admin Menu:
 ```bash
-Admin Menu - [yyyy/MM/dd HH:mm]
+WSC - Admin Menu 🛠️
+Hello [AdminName] - [yyyy/MM/dd HH:mm]
 ---------------------------------  
 Name: ...
 Email: ...
@@ -106,7 +107,7 @@ Email: ...
 [3] Manage Customers
 [4] Analytics
 [5] System Settings
-[0] Exit
+[0] Quit
 
 Select an option: _
 ```
@@ -121,7 +122,7 @@ WSC - Product Management 🛠️ - [yyyy/MM/dd HH:mm]
 [3] Create Product
 [4] Update Product
 [5] Delete Product
-[0] Exit
+[0] Quit
 
 Select an option: _
 ```

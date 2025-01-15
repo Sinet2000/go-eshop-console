@@ -36,7 +36,7 @@ func Confirm(confirmPrompt string) (bool, error) {
 	}
 }
 
-func GetUserSelectedOption() (int, error) {
+func PromptUserForSelection() (int, error) {
 	fmt.Printf("\nSelect an option: ")
 	reader := bufio.NewReader(os.Stdin)
 
@@ -54,8 +54,8 @@ func GetUserSelectedOption() (int, error) {
 		return 0, fmt.Errorf("invalid input: %w", err)
 	}
 
-	fmt.Println("\nPress Enter to continue...")
-	fmt.Scanln()
+	// fmt.Println("\nPress Enter to continue...")
+	// fmt.Scanln()
 
 	return choice, nil
 }

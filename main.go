@@ -21,10 +21,11 @@ func main() {
 		return
 	}
 
-	_, err = db.NewPgService()
-	if err != nil {
-		log.Fatalf("Failed to connect to PostgreSQL Db: %v", err)
-	}
+	config.LoadConfig()
+	//_, err = db.NewPgService()
+	//if err != nil {
+	//	log.Fatalf("Failed to connect to PostgreSQL Db: %v", err)
+	//}
 
 	mongoDbContext, err := db.NewMongoService(config.GetEnv("MONGO_DB_NAME"))
 	if err != nil {

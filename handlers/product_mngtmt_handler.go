@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/pagination"
 	"log"
 	"os"
 	"time"
 
-	"github.com/Sinet2000/go-eshop-console/internal/entities"
 	"github.com/Sinet2000/go-eshop-console/internal/services"
 	"github.com/Sinet2000/go-eshop-console/internal/utils"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
@@ -57,10 +57,8 @@ func (h *ProductMngmtHandler) HandleAdminManageProducts() {
 
 func (h *ProductMngmtHandler) handleListProducts() {
 	logger.PrintlnColoredText("📜 Retrieving products from storage ...", logger.GrayTxtColorCode)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
-	productsList, err := h.productService.ListAllProducts(ctx)
+	productsList, err := h.productService.ListAllProducts()
 	if err != nil {
 		log.Fatalf("Error fetching products: %v", err)
 	}
@@ -78,22 +76,17 @@ func (h *ProductMngmtHandler) handleListProductsPaged() {
 	logger.PrintlnColoredText("📜 Retrieving products from storage ...", logger.GrayTxtColorCode)
 
 	for {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		func() {
-			defer cancel()
-		}()
-
-		totalCount, err := h.productService.GetProductsTotalCount(ctx)
+		productsPageResult, err := h.productService.ListAllProductsPaged(&pagination.PageQuery{PageIndex: 1, PageSize: 5})
 		if err != nil {
 			log.Fatalf("%v", err)
 			return
 		}
 
-		fmt.Println("Admin: Products (Page 1)")
-		tables.ListProducts([]entities.Product{})
+		fmt.Printf("Admin: Products (Page %d) \n", productsPageResult.Page)
+		tables.ListProducts(productsPageResult.Data)
 
 		fmt.Println("-----------------------------------")
-		fmt.Printf("Total count: %d \n", totalCount)
+		fmt.Printf("Total count: %d \n", productsPageResult.TotalCount)
 
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"", ""})

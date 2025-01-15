@@ -192,6 +192,306 @@ Select an option: _
 ```
 
 ---
+## MongoDB Docs
+MongoDB is a NoSQL document-oriented database. Instead of tables and rows, data is stored in collections and documents. This allows for flexible schemas and the ability to store complex data structures within a single record.
+
+If you are transitioning from SQL:
+- **Database** in MongoDB is analogous to a database in SQL.
+- **Collection** in MongoDB is analogous to a table in SQL.
+- **Document** in MongoDB is analogous to a row in SQL, but stored in BSON (binary JSON) format.
+
+### Setting Up
+1. **Install the MongoDB Go Driver:**
+   ```bash
+   go get go.mongodb.org/mongo-driver/mongo
+   go get go.mongodb.org/mongo-driver/bson
+   ```
+2. **Connect to MongoDB:**
+   ```go
+   package main
+   
+   
+   func NewMongoService(dbName string) (*MongoDbContext, error) {
+       config.LoadConfig()
+   
+       mongoURI := config.GetEnv("MONGO_URI")
+       mongoUser := config.GetEnv("MONGO_USER")
+       mongoPassword := config.GetEnv("MONGO_PASSWORD")
+       mongoAuthSource := config.GetEnv("MONGO_AUTH_SOURCE")
+   
+       credential := options.Credential{
+           AuthSource: mongoAuthSource,
+           Username:   mongoUser,
+           Password:   mongoPassword,
+       }
+   
+       ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+       defer cancel()
+   
+       serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+       opts := options.Client().ApplyURI(mongoURI).SetAuth(credential).SetServerAPIOptions(serverAPI)
+       client, err := mongo.Connect(ctx, opts)
+   
+       if err != nil {
+           log.Fatalf("Error connecting to MongoDB: %v", err)
+           return nil, err
+       }
+   
+       if err := ensureHealthy(client, ctx); err != nil {
+           // If ping fails, disconnect to avoid leaving the client in an inconsistent state
+           _ = client.Disconnect(context.Background())
+           return nil, err
+       }
+   
+       logger.PrintlnColoredText("Successfully connected to MongoDB!", logger.GreenTxtColorCode)
+       return &MongoDbContext{
+           Client: client,
+           DB:     client.Database(dbName),
+       }, nil
+   }
+   ```
+
+### Basic Concepts
+#### Collections vs. Tables
+- In MongoDB, you do not need to define a schema before creating a collection. You can simply start inserting documents into a collection that does not yet exist, and MongoDB will create it on the fly.
+
+#### Documents vs. Rows
+- A MongoDB document is a JSON-like structure (BSON under the hood). This means each document can have different fields.
+
+#### Flexible Schema
+- In an SQL database, all rows in a table must have the same columns (though columns can be NULL). In MongoDB, each document in a collection can have different or additional fields if needed.
+
+### Data Types
+MongoDB supports various data types, some of which directly map to Go data types:
+
+1. **String** (string in Go)
+2. **Boolean** (bool in Go)
+3. **Integer** (int, int32, int64 in Go)
+4. **Double** (float64 in Go)
+5. **Date** (represented as time.Time in Go)
+6. **Array** (represented as slices in Go)
+7. **Object** / Embedded Document (represented as bson.M or structs in Go)
+8. **ObjectId** (represented by primitive.ObjectID in Go from the MongoDB driver)
+
+### CRUD Operations
+#### Create
+To insert data into a MongoDB collection, you can use:
+
+* `InsertOne()`: to insert a single document
+* `InsertMany()`: to insert multiple documents
+
+**Example** (`InsertOne`):
+```go
+package main
+
+import (
+"context"
+"fmt"
+"log"
+"time"
+
+    "go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/mongo"
+    "go.mongodb.org/mongo-driver/mongo/options"
+)
+
+type User struct {
+    Name  string `bson:"name"`
+    Email string `bson:"email"`
+    Age   int    `bson:"age"`
+}
+
+func main() {
+   ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+   defer cancel()
+
+    client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer client.Disconnect(ctx)
+
+    // Choose the database and collection
+    collection := client.Database("testdb").Collection("users")
+
+    // Create a user
+    newUser := User{
+        Name:  "John Doe",
+        Email: "john@example.com",
+        Age:   30,
+    }
+
+    // Insert the user document
+    res, err := collection.InsertOne(ctx, newUser)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println("Inserted document ID:", res.InsertedID)
+}
+```
+
+#### Read
+To retrieve documents from a collection, you use `Find()` or `FindOne()`.
+
+```go
+func main() {
+   // ...connection code omitted for brevity...
+
+    collection := client.Database("testdb").Collection("users")
+
+    // Find all users
+    cursor, err := collection.Find(ctx, bson.M{})
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer cursor.Close(ctx)
+
+    var users []User
+    if err = cursor.All(ctx, &users); err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("Found users: %+v\n", users)
+
+    // Find a single user
+    var singleUser User
+    err = collection.FindOne(ctx, bson.M{"name": "John Doe"}).Decode(&singleUser)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("Found one user: %+v\n", singleUser)
+}
+```
+
+#### Update
+To update documents:
+
+* `UpdateOne()`: update a single document
+* `UpdateMany()`: update multiple documents
+* `ReplaceOne()`: replace a single document completely
+Example `(UpdateOne)`:
+```go
+update := bson.M{
+   "$set": bson.M{
+      "age": 31,
+   },
+}
+
+filter := bson.M{"email": "john@example.com"}
+
+res, err := collection.UpdateOne(ctx, filter, update)
+if err != nil {
+   log.Fatal(err)
+}
+
+fmt.Printf("Matched %v documents and updated %v documents.\n", res.MatchedCount, res.ModifiedCount)
+```
+
+#### Delete
+To delete documents:
+
+* `DeleteOne()`
+* `DeleteMany()`
+Example (`DeleteOne`):
+
+```go
+filter := bson.M{"name": "John Doe"}
+res, err := collection.DeleteOne(ctx, filter)
+if err != nil {
+   log.Fatal(err)
+}
+
+fmt.Printf("Deleted %v documents.\n", res.DeletedCount)
+```
+
+### Queries and Filters
+#### Basic Filters
+Queries (filters) in MongoDB are specified as bson.M objects (maps in Go) or by using typed APIs. Common filters resemble SQL WHERE clauses but in JSON-like form.
+
+```go
+// Example Filter to find all documents where age is 30
+filter := bson.M{"age": 30}
+cursor, err := collection.Find(ctx, filter)
+```
+
+#### Operators
+MongoDB provides a variety of query operators, such as:
+
+* `$gt`, `$gte`: Greater than, greater or equal
+* `$lt`, `$lte`: Less than, less or equal
+* `$eq`, `$ne`: Equal, not equal
+* `$in`, `$nin`: In, not in
+* `$and`, `$or`: AND, OR
+
+Example using `$gt`:
+```go
+filter := bson.M{
+   "age": bson.M{
+      "$gt": 25,
+   },
+}
+cursor, err := collection.Find(ctx, filter)
+```
+
+### Projections (Select)
+In SQL, you might specify columns to return (e.g. `SELECT name, age FROM users`). In MongoDB, use a projection to limit which fields are returned.
+
+```go
+options := options.Find().SetProjection(bson.M{"email": 1, "_id": 0})
+// Only return the "email" field and exclude the "_id" field
+
+cursor, err := collection.Find(ctx, bson.M{}, options)
+if err != nil {
+   log.Fatal(err)
+}
+```
+
+### Limiting Results
+Like `LIMIT` in SQL, use SetLimit:
+```go
+options := options.Find().SetLimit(5)
+cursor, err := collection.Find(ctx, bson.M{}, options)
+if err != nil {
+   log.Fatal(err)
+}
+```
+
+### Transactions
+MongoDB supports multi-document transactions in replica set or sharded deployments. This is somewhat analogous to transactions in SQL databases. You start a session, begin a transaction, perform operations, and then commit or abort.
+
+```go
+session, err := client.StartSession()
+if err != nil {
+    log.Fatal(err)
+}
+defer session.EndSession(ctx)
+
+// Transaction function
+callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
+    // All operations in this function will be part of a transaction
+    collection := client.Database("testdb").Collection("users")
+
+    _, err := collection.InsertOne(sessCtx, bson.M{"name": "Jane", "age": 28})
+    if err != nil {
+        return nil, err
+    }
+
+    // ... more operations ...
+
+    return nil, nil
+}
+
+_, err = session.WithTransaction(ctx, callback)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Println("Transaction complete.")
+
+```
+---
 
 ## Git Guidelines
 

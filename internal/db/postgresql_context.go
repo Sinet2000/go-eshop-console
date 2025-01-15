@@ -2,8 +2,9 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
+	"log"
 	"time"
 
 	"github.com/Sinet2000/go-eshop-console/config"
@@ -32,17 +33,17 @@ func NewPgService() (*PostgreSqlDbContext, error) {
 
 	conn, err := pgx.Connect(ctx, connectionString)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		log.Fatalf("Error: Unable to connect to the database: %v", err)
 		return nil, err
 	}
 
 	var firstName string
 	err = conn.QueryRow(context.Background(), "select first_name from customers where id=$1", 1).Scan(&firstName)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			fmt.Fprintf(os.Stderr, "No record found for ID: %d\n", 1)
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Fatalf("No record found for ID: %d", 1)
 		} else {
-			fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+			log.Fatalf("QueryRow failed: %v", err)
 			return nil, err
 		}
 	}
@@ -58,7 +59,7 @@ func (ctx *PostgreSqlDbContext) Disconnect() error {
 	if ctx.Conn != nil {
 		err := ctx.Conn.Close(context.Background())
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error disconnecting from database: %v\n", err)
+			log.Fatalf("Error disconnecting from database: %v\n", err)
 			return err
 		}
 		fmt.Println("Disconnected from database")

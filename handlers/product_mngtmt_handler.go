@@ -68,7 +68,10 @@ func (h *ProductMngmtHandler) handleListProducts() {
 	tables.ListProducts(productsList)
 
 	fmt.Println("\nPress Enter to continue...")
-	fmt.Scanln()
+	_, err = fmt.Scanln()
+	if err != nil {
+		return
+	}
 }
 
 func (h *ProductMngmtHandler) handleListProductsPaged() {
@@ -76,11 +79,14 @@ func (h *ProductMngmtHandler) handleListProductsPaged() {
 
 	for {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		defer cancel()
+		func() {
+			defer cancel()
+		}()
+
 		totalCount, err := h.productService.GetProductsTotalCount(ctx)
 		if err != nil {
 			log.Fatalf("%v", err)
-			continue
+			return
 		}
 
 		fmt.Println("Admin: Products (Page 1)")
@@ -105,7 +111,10 @@ func (h *ProductMngmtHandler) handleListProductsPaged() {
 			return
 		}
 		fmt.Println("\nPress Enter to continue...")
-		fmt.Scanln()
+		_, err = fmt.Scanln()
+		if err != nil {
+			return
+		}
 
 		switch option {
 		case "N":

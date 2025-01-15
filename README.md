@@ -1,3 +1,77 @@
+
+1. [Git Guidelines](#git-guidelines)
+2. [Commands](#commands)
+3. [Project Structure](#project-structure)
+4. [App Highlights](#app-highlights)
+5. [Go Concurrency & Context - Quick Overview](#go-concurrency--context---quick-overview)
+6. [MongoDB Docs](#mongodb-docs)
+
+---
+
+## Git Guidelines
+
+This document outlines the naming conventions for branches and commits to ensure clarity, traceability, and consistency in the project.
+
+### **Branch Naming Convention**
+Branch names should follow this structure: `<phase>/(WSC-<ticket-number>)-<feature-or-task-name>`
+
+### **Phases**
+
+- `init`: Setting up the initial project structure.
+- `feat`: For new features.
+- `enhance`: Feature enhancements and improvements.
+- `fix`: For bug fixes.
+- `docs`: For documentation changes.
+- `refactor`: For code restructuring.
+- `test`: For adding or improving tests.
+- `infra`: infrastructure management, ci/cd, including cloud setup, networking, servers
+
+### **Examples**
+- `init/(WSC-<ticket-number>)-project-setup`: Setting up the initial project structure.
+- `feat/(WSC-4)-product-listing`: Adding a new feature for listing products.
+- `enhance/(WSC-8)-filter-products`: Enhancing filtering options for products.
+- `fix/(WSC-12)-error-handling`: Fixing bugs in error handling.
+- `docs/(WSC-15)-update-readme`: Updating project documentation.
+- `refactor/(WSC-11)-catalog-module`: Restructuring the catalog module for efficiency.
+- `test/(WSC-14)-add-unit-tests`: Adding unit tests for core functionality.
+- `infra/(WSC-15)-add-azure-logging`: Adding Logging to Azure
+
+### **Commit Message Rules**
+
+Commit messages should follow this format: `type(WSC-<ticket-number>):<short description>`
+
+### **Best Practices**
+1. **Write Descriptive Commit Messages**:
+   - Keep them concise yet informative.
+   - Example: `fix(WSC-2): handle invalid payment input gracefully`.
+
+2. **Group Related Changes in Branches**:
+   - Focus each branch on a single task or feature.
+   - Avoid unrelated changes in a single branch.
+
+3. **Keep Commits Atomic**:
+   - Each commit should represent a logical change.
+   - Example: Separate commits for adding functionality and fixing bugs.
+
+4. **Use Pull Requests (PRs)**:
+   - Always create a pull request for branch merges.
+   - Include detailed descriptions of changes in the PR.
+
+### **Workflow Example**
+
+1. **Branch Creation**:
+   - Create a branch for the task: `core/product-listing`.
+
+2. **Commit Example**:
+   - `feat(PAT): implement product listing with stock status`
+
+3. **Pull Request**:
+   - PR Title: `Implement product listing feature`
+   - PR Description:
+      - Adds functionality to display product list with stock status.
+      - Handles edge cases for empty product list.
+
+---
 ## Commands
 ### Go commands
 ```bash
@@ -192,6 +266,136 @@ Select an option: _
 ```
 
 ---
+
+## Go Concurrency & Context - Quick Overview
+> Go is designed with **concurrency** in mind. It uses a lightweight, powerful concurrency model based on **goroutines** and **channels**. Additionally, the standard library offers **context** to manage deadlines, cancellation, and request-scoped data across function boundaries.
+> 
+> These features are especially relevant when building **network** or **database-driven** applications because you need to efficiently handle multiple simultaneous operations and gracefully cancel or time out long-running tasks.
+
+### Goroutines
+
+A **goroutine** is a lightweight thread of execution in Go. You can create one using the `go` keyword before a function call.
+
+#### Key Points
+1. **Lightweight**: Thousands of goroutines can run on a few OS threads.
+2. **Non-blocking**: Other goroutines keep running even if one is blocked (e.g., waiting on I/O).
+3. **Share Memory by Communicating**: The recommended practice is to avoid sharing memory across threads if possible; use **channels** to coordinate instead.
+
+##### Example
+
+```go
+func main() {
+    // This runs in the main goroutine
+    go sayHello("Alice") // This starts a new goroutine
+    go sayHello("Bob")
+
+    // Wait for input to prevent main() from exiting immediately
+    fmt.Scanln()
+}
+
+func sayHello(name string) {
+    fmt.Printf("Hello, %s!\n", name)
+}
+```
+
+- Each call to sayHello with go runs concurrently.
+- Scanln() is used so the program doesn’t exit immediately (in real code, you often use sync.WaitGroup or a more advanced approach).
+
+### Channels
+A `channel` in Go is a typed conduit to send and receive values between goroutines. Channels help synchronize goroutines and enable safe communication without extensive locking.
+
+**Key Points**
+* **Typed**: A channel has a specific type (e.g., chan int).
+* **Unbuffered** vs. **Buffered**:
+  * Unbuffered channels block until the receiver is ready.
+  * Buffered channels allow a limited queue of messages.
+
+##### Example
+```go
+func main() {
+    ch := make(chan string)
+
+    // Producer goroutine
+    go func() {
+        ch <- "ping" // Send a message to the channel
+    }()
+
+    // Consumer goroutine
+    msg := <-ch // Receive the message (blocks until producer sends)
+    fmt.Println(msg)
+}
+
+```
+
+- The producer goroutine sends `"ping"` into the channel.
+- The main goroutine blocks on `<-ch` until it receives a value.
+
+#### Closing a Channel
+When you’re done sending values, you can close(ch). Receivers get a zero value if they continue to read from a closed channel, and can check if the channel is closed by the two-value receive form: v, ok := <-ch.
+
+### Context
+The `context` package helps manage `cancellation`, `deadlines`, and other `request-scoped` values. This is very useful in long-running or I/O-bound processes where you might want to cancel or timeout the operation.
+
+#### Key Points
+1. **Inheritance**: You create a context from a parent (e.g., context.Background()) and pass it down call chains.
+2. **Cancellation**: If a context is canceled, all functions using it should stop as soon as possible and clean up.
+3. **Timeouts**: context.WithTimeout sets a deadline after which the context is automatically canceled.
+
+##### Example
+```go
+func main() {
+    // Create a context that times out after 3 seconds
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
+
+    // Pass ctx to a function that might block
+    err := doLongRunningTask(ctx)
+    if err != nil {
+        fmt.Println("Task failed or timed out:", err)
+    } else {
+        fmt.Println("Task completed successfully")
+    }
+}
+
+func doLongRunningTask(ctx context.Context) error {
+    select {
+    case <-time.After(5 * time.Second):
+        // Simulate a long task
+        return nil
+    case <-ctx.Done():
+        // The context was canceled or expired
+        return ctx.Err()
+    }
+}
+
+```
+
+- `time.After(5s)` simulates a 5-second task, but the context times out at 3 seconds, so the task will cancel early.
+- When `ctx.Done()` is signaled, we handle cleanup (if needed) and return.
+
+### Error Handling Patterns
+Although `error handling` isn’t strictly part of concurrency, it’s crucial when dealing with asynchronous operations that can fail. In Go:
+
+1. `Check Errors Early`: After each function call that might fail, check the error. This avoids silent failures or confusion later.
+2. `Wrap Errors`: Use fmt.Errorf("... %w", err) or similar to provide more context about where an error occurred.
+3. `Use Sentinel Errors`: Sometimes define package-level var ErrSomething = errors.New("...") for repeated checks.
+
+#### Example
+```go
+if err := doSomething(); err != nil {
+    return fmt.Errorf("could not do something: %w", err)
+}
+```
+
+### Summary
+- `Goroutines`: Let you run functions concurrently. They are cheap and numerous compared to OS threads.
+- `Channels`: Provide a way to safely communicate between goroutines without excessive locking.
+- `Context`: Manages cancellation and timeouts, essential in network/database interactions.
+- `Error Handling`: Go uses explicit error returns; checking and wrapping errors keeps code understandable.
+
+- These features work together to build highly concurrent yet maintainable applications in Go. Start simple—launch goroutines, pass data via channels, and wrap calls in contexts for robust cancellation and timeouts. Over time, incorporate more advanced patterns like worker pools, sync.WaitGroup, or pipeline concurrency as your needs grow.
+---
+
 ## MongoDB Docs
 MongoDB is a NoSQL document-oriented database. Instead of tables and rows, data is stored in collections and documents. This allows for flexible schemas and the ability to store complex data structures within a single record.
 
@@ -272,6 +476,55 @@ MongoDB supports various data types, some of which directly map to Go data types
 6. **Array** (represented as slices in Go)
 7. **Object** / Embedded Document (represented as bson.M or structs in Go)
 8. **ObjectId** (represented by primitive.ObjectID in Go from the MongoDB driver)
+
+### Quick Reference for BSON Types
+#### 1. `bson.M`
+- **Definition**: `bson.M` is a Go map: `map[string]interface{}`.
+- **Usage**: Quick, unordered BSON documents (filters, updates, inserts).
+- **Example**:
+  ```go
+  filter := bson.M{"age": 30}
+  update := bson.M{"$set": bson.M{"active": true}}
+  ```
+**When to Use:**
+Most CRUD operations (Find, Update, Insert) when the order of fields does not matter.
+
+#### 2. `bson.D`
+- **Definition**: `bson.D` is a slice of bson.E structs, which preserve order of fields
+```go
+type D []E
+type E struct {
+    Key   string
+    Value interface{}
+}
+```
+
+- **Usage**: Primarily for aggregation pipelines or any scenario where you want fields in a specific order.
+Example:
+```go
+filter := bson.D{
+    {Key: "age", Value: bson.D{{Key: "$gt", Value: 25}}},
+    {Key: "name", Value: "John"},
+}
+```
+
+**When to Use:**
+- For aggregation stages ($match, $project, $group, etc.)** or if you explicitly need ordered fields.
+
+#### 3. `primitive.D`
+- **Definition**: Identical concept to bson.D, but located in the primitive package.
+- **Usage**: Same as bson.D. The driver uses bson.D and primitive.D somewhat interchangeably.
+Example:
+```go
+pipeline := mongo.Pipeline{
+    {{"$match", primitive.D{{"age", primitive.D{{"$gt", 25}}}}}},
+}
+
+```
+
+#### 4. Which One Should You Use?
+- `bson.M`: Most common, unordered. Use it for everyday queries and updates if you don’t care about field order.
+- `bson.D / primitive.D`: For ordered documents, especially in aggregation pipelines or queries that rely on specific field order.
 
 ### CRUD Operations
 #### Create
@@ -458,6 +711,48 @@ if err != nil {
 }
 ```
 
+### Aggregation Pipelines
+An aggregation pipeline is a sequence of stages (like $match, $project, $group, etc.) that transform your documents. In Go, you often build pipelines using mongo.Pipeline—a slice of documents that each contain one stage.
+
+#### Basic Pipeline with $match and $project
+```go
+pipeline := mongo.Pipeline{
+    // 1) $match stage: filter documents where age > 25
+    {{"$match", bson.M{"age": bson.M{"$gt": 25}}}},
+
+    // 2) $project stage: select only "name" and "email" fields
+    {{"$project", bson.M{"name": 1, "email": 1, "_id": 0}}},
+}
+
+cursor, err := collection.Aggregate(ctx, pipeline)
+```
+
+### Pagination Example
+A common way to paginate with MongoDB is to use skip and limit. For instance, if you want 10 items per page:
+
+* page (the current page number)
+* limit (items per page)
+* skip = (page - 1) * limit
+
+```go
+
+page := 2
+limit := int64(10)
+skip := (page - 1) * limit
+
+opts := options.Find().
+    SetSkip(skip).
+    SetLimit(limit)
+
+cursor, err := collection.Find(ctx, bson.M{}, opts)
+if err != nil {
+    // handle error
+}
+defer cursor.Close(ctx)
+
+// process results...
+
+```
 ### Transactions
 MongoDB supports multi-document transactions in replica set or sharded deployments. This is somewhat analogous to transactions in SQL databases. You start a session, begin a transaction, perform operations, and then commit or abort.
 
@@ -491,69 +786,4 @@ if err != nil {
 fmt.Println("Transaction complete.")
 
 ```
----
-
-## Git Guidelines
-
-This document outlines the naming conventions for branches and commits to ensure clarity, traceability, and consistency in the project.
-
-### **Branch Naming Convention**
-Branch names should follow this structure: `<phase>/(WSC-<ticket-number>)-<feature-or-task-name>`
-
-### **Phases**
-
-- `init`: Setting up the initial project structure.
-- `feat`: For new features.
-- `enhance`: Feature enhancements and improvements.
-- `fix`: For bug fixes.
-- `docs`: For documentation changes.
-- `refactor`: For code restructuring.
-- `test`: For adding or improving tests.
-- `infra`: infrastructure management, ci/cd, including cloud setup, networking, servers
-
-### **Examples**
-- `init/(WSC-<ticket-number>)-project-setup`: Setting up the initial project structure.
-- `feat/(WSC-4)-product-listing`: Adding a new feature for listing products.
-- `enhance/(WSC-8)-filter-products`: Enhancing filtering options for products.
-- `fix/(WSC-12)-error-handling`: Fixing bugs in error handling.
-- `docs/(WSC-15)-update-readme`: Updating project documentation.
-- `refactor/(WSC-11)-catalog-module`: Restructuring the catalog module for efficiency.
-- `test/(WSC-14)-add-unit-tests`: Adding unit tests for core functionality.
-- `infra/(WSC-15)-add-azure-logging`: Adding Logging to Azure
-
-### **Commit Message Rules**
-
-Commit messages should follow this format: `type(WSC-<ticket-number>):<short description>`
-
-### **Best Practices**
-1. **Write Descriptive Commit Messages**:
-   - Keep them concise yet informative.
-   - Example: `fix(WSC-2): handle invalid payment input gracefully`.
-
-2. **Group Related Changes in Branches**:
-   - Focus each branch on a single task or feature.
-   - Avoid unrelated changes in a single branch.
-
-3. **Keep Commits Atomic**:
-   - Each commit should represent a logical change.
-   - Example: Separate commits for adding functionality and fixing bugs.
-
-4. **Use Pull Requests (PRs)**:
-   - Always create a pull request for branch merges.
-   - Include detailed descriptions of changes in the PR.
-
-### **Workflow Example**
-
-1. **Branch Creation**:
-   - Create a branch for the task: `core/product-listing`.
-
-2. **Commit Example**:
-   - `feat(PAT): implement product listing with stock status`
-
-3. **Pull Request**:
-   - PR Title: `Implement product listing feature`
-   - PR Description:
-     - Adds functionality to display product list with stock status.
-     - Handles edge cases for empty product list.
-
 ---

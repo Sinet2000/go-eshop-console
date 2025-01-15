@@ -47,7 +47,7 @@ func main() {
 
 	for {
 		adminMenuHandler := handlers.NewAdminHandler(productRepo)
-		exit := adminMenuHandler.HandleAdminMenu()
+		shouldExit := adminMenuHandler.RunAdminMenu()
 
 		// 	return
 		// case 1:
@@ -82,7 +82,7 @@ func main() {
 		// 	fmt.Println("❗Invalid choice. Please try again. ❗")
 		// }
 
-		if exit {
+		if shouldExit {
 			logger.PrintlnColoredText("Quit 🚪", logger.GreenTxtColorCode)
 			fmt.Println("Goodbye! 👋")
 			break

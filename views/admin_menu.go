@@ -8,7 +8,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func DispalyAdminMenu() {
+func DisplayAdminMenu() {
 	currentTime := time.Now().Format("2006-01-02 15:04")
 	fmt.Printf("WSC - Product Management 🛠️ - %s\n", currentTime)
 

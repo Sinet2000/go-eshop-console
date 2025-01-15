@@ -101,12 +101,26 @@ Admin Menu - [yyyy/MM/dd HH:mm]
 Name: ...
 Email: ...
 
-[1] Add Product
-[2] Update Product
-[3] Delete Product
-[4] View All Products
-[5] View All Orders (Paginated)
-[6] View All Customers
+[1] Manage Products
+[2] Manage Orders
+[3] Manage Customers
+[4] Analytics
+[5] System Settings
+[0] Exit
+
+Select an option: _
+```
+
+### Example: Admin Menu (Products Management):
+```bash
+WSC - Product Management 🛠️ - [yyyy/MM/dd HH:mm]
+---------------------------------
+
+[1] List All Products
+[2] List Products (Paginated)
+[3] Create Product
+[4] Update Product
+[5] Delete Product
 [0] Exit
 
 Select an option: _

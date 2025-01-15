@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Sinet2000/go-eshop-console/config"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -47,7 +48,7 @@ func NewMongoService(dbName string) (*MongoDbContext, error) {
 		return nil, err
 	}
 
-	log.Println("Successfully connected to MongoDB!")
+	logger.PrintlnColoredText("Successfully connected to MongoDB!", logger.GreenTxtColorCode)
 	return &MongoDbContext{
 		Client: client,
 		DB:     client.Database(dbName),
@@ -63,7 +64,7 @@ func (m *MongoDbContext) Close() error {
 		return err
 	}
 
-	log.Println("Disconnected from MongoDB")
+	logger.PrintlnColoredText("Disconnected from MongoDB!", logger.GrayTxtColorCode)
 	return nil
 }
 
@@ -83,6 +84,6 @@ func ensureHealthy(client *mongo.Client) error {
 		return err
 	}
 
-	log.Println("Database is healthy")
+	logger.PrintlnColoredText("Database is healthy!", logger.GreenTxtColorCode)
 	return nil
 }

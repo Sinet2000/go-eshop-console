@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/services"
+	"github.com/Sinet2000/go-eshop-console/internal/utils"
+	"github.com/Sinet2000/go-eshop-console/views"
 )
 
 type AdminHandler struct {
@@ -17,31 +20,36 @@ func NewAdminHandler(productRepo *db.ProductRepository) *AdminHandler {
 	return &AdminHandler{productService: productService}
 }
 
-func (h *AdminHandler) HandleAdminMenu(option int) bool {
+func (h *AdminHandler) HandleAdminMenu() bool {
 	productHandler := NewProductMngmtHandler(h.productService)
 
-	switch option {
-	case 1:
-		productHandler.HandleAdminManageProducts()
-		return false
-	case 2:
-		handleManageOrders()
-		return false
-	case 3:
-		handleManageCustomers()
-		return false
-	case 4:
-		handleAnalytics()
-		return false
-	case 5:
-		handleSystemSettings()
-		return false
-	case 0:
-		return true
-	default:
-		fmt.Println("Invalid selection. Please try again.")
-		return false
+	for {
+		views.DispalyAdminMenu()
+
+		option, err := utils.PromptIntInput()
+		if err != nil {
+			log.Printf("Error: %v\n", err)
+			continue
+		}
+
+		switch option {
+		case 1:
+			productHandler.HandleAdminManageProducts()
+		case 2:
+			handleManageOrders()
+		case 3:
+			handleManageCustomers()
+		case 4:
+			handleAnalytics()
+		case 5:
+			handleSystemSettings()
+		case 0:
+			return true
+		default:
+			fmt.Println("Invalid selection. Please try again.")
+		}
 	}
+
 }
 
 // handleManageOrders handles actions related to order management.

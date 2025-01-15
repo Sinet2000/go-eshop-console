@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/pagination"
 	"log"
 
 	"github.com/Sinet2000/go-eshop-console/config"
@@ -22,8 +23,12 @@ func NewProductService(repo *db.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 
-func (s *ProductService) ListAllProducts(ctx context.Context) ([]entities.Product, error) {
-	return s.repo.ListAll(ctx)
+func (s *ProductService) ListAllProducts() ([]entities.Product, error) {
+	return s.repo.ListAll()
+}
+
+func (s *ProductService) ListAllProductsPaged(pq *pagination.PageQuery) (pagination.PagedResult[entities.Product], error) {
+	return s.repo.ListPaged(pq)
 }
 
 func (s *ProductService) GetProductById(ctx context.Context, id string) (*entities.Product, error) {

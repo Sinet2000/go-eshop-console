@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/pagination"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"time"
 
 	"github.com/Sinet2000/go-eshop-console/internal/entities"
 	"go.mongodb.org/mongo-driver/bson"
@@ -45,7 +48,44 @@ func (r *ProductRepository) InsertProducts(ctx context.Context, products []inter
 	return insertResult.InsertedIDs, nil
 }
 
-func (r *ProductRepository) ListAll(ctx context.Context) ([]entities.Product, error) {
+func (r *ProductRepository) ListPaged(pq *pagination.PageQuery) (pagination.PagedResult[entities.Product], error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	filter, ok := pq.Filter.(bson.M)
+	if !ok || filter == nil {
+		filter = bson.M{}
+	}
+
+	totalCount, err := r.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		log.Printf("Error counting documents: %v", err)
+		return pagination.CreatePagedResult[entities.Product](nil, 0, pq.PageIndex, pq.PageSize), err
+	}
+
+	skip := (pq.PageIndex - 1) * pq.PageSize
+	searchOpts := options.Find().SetSkip(skip).SetLimit(pq.PageSize)
+	cursor, err := r.collection.Find(ctx, filter, searchOpts)
+	if err != nil {
+		log.Printf("Error finding documents: %v", err)
+		return pagination.CreatePagedResult[entities.Product](nil, totalCount, pq.PageIndex, pq.PageSize), err
+	}
+	defer cursor.Close(ctx)
+
+	var products []entities.Product
+	if err := cursor.All(ctx, &products); err != nil {
+		log.Printf("Error decoding documents: %v", err)
+		return pagination.CreatePagedResult[entities.Product](nil, totalCount, pq.PageIndex, pq.PageSize), err
+	}
+
+	// Construct and return the PagedResult
+	return pagination.CreatePagedResult[entities.Product](products, totalCount, pq.PageIndex, pq.PageSize), nil
+}
+
+func (r *ProductRepository) ListAll() ([]entities.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	cursor, err := r.collection.Find(ctx, bson.D{})
 	if err != nil {
 		log.Printf("Error finding documents: %v", err)

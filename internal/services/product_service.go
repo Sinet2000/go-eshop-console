@@ -41,7 +41,7 @@ func (s *ProductService) GetProductById(ctx context.Context, id string) (*entiti
 }
 
 func (s *ProductService) GetProductsTotalCount(ctx context.Context) (int64, error) {
-	count, err := s.repo.CountProducts(ctx)
+	count, err := s.repo.CountProducts(ctx, nil)
 	if err != nil {
 		return 0, fmt.Errorf("cannot count products : %v", err)
 	}
@@ -51,7 +51,7 @@ func (s *ProductService) GetProductsTotalCount(ctx context.Context) (int64, erro
 
 func (s *ProductService) Seed(ctx context.Context) error {
 	// Count the products in the collection
-	count, err := s.repo.CountProducts(ctx)
+	count, err := s.repo.CountProducts(ctx, nil)
 	if err != nil {
 		log.Fatalf("Error counting products: %v", err)
 	}

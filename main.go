@@ -9,7 +9,6 @@ import (
 	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/utils"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
-	"github.com/Sinet2000/go-eshop-console/views"
 )
 
 func main() {
@@ -47,16 +46,8 @@ func main() {
 	fmt.Println()
 
 	for {
-		views.DispalyAdminMenu()
-
-		choice, err := utils.PromptUserForSelection()
-		if err != nil {
-			log.Printf("Error: %v\n", err)
-			return
-		}
-
 		adminMenuHandler := handlers.NewAdminHandler(productRepo)
-		exit := adminMenuHandler.HandleAdminMenu(choice)
+		exit := adminMenuHandler.HandleAdminMenu()
 
 		// 	return
 		// case 1:

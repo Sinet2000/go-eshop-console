@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Sinet2000/go-eshop-console/config"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -38,11 +39,17 @@ func NewPgService() (*PostgreSqlDbContext, error) {
 	var firstName string
 	err = conn.QueryRow(context.Background(), "select first_name from customers where id=$1", 1).Scan(&firstName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		return nil, err
+		if err == pgx.ErrNoRows {
+			fmt.Fprintf(os.Stderr, "No record found for ID: %d\n", 1)
+		} else {
+			fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+			return nil, err
+		}
 	}
 
 	fmt.Println(firstName)
+
+	logger.PrintlnColoredText(fmt.Sprintf("Connected to PostgreSQL Db : %s!", dbName), logger.GreenTxtColorCode)
 
 	return &PostgreSqlDbContext{Conn: conn}, nil
 }

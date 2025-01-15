@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -22,8 +23,12 @@ func NewProductRepository(db *mongo.Database) *ProductRepository {
 	}
 }
 
-func (r *ProductRepository) CountProducts(ctx context.Context) (int64, error) {
-	count, err := r.collection.CountDocuments(ctx, bson.D{})
+func (r *ProductRepository) CountProducts(ctx context.Context, filter interface{}) (int64, error) {
+	if filter == nil {
+		filter = bson.D{}
+	}
+
+	count, err := r.collection.CountDocuments(ctx, filter)
 	if err != nil {
 		log.Printf("Error counting documents in 'products' collection: %v", err)
 		return 0, err
@@ -46,7 +51,13 @@ func (r *ProductRepository) ListAll(ctx context.Context) ([]entities.Product, er
 		log.Printf("Error finding documents: %v", err)
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.Printf("Error: %v\n", err)
+		}
+	}(cursor, ctx)
 
 	var products []entities.Product
 	for cursor.Next(ctx) {
@@ -72,7 +83,7 @@ func (r *ProductRepository) GetById(ctx context.Context, id primitive.ObjectID) 
 
 	err := r.collection.FindOne(ctx, filter).Decode(&product)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, fmt.Errorf("product not found")
 		}
 		return nil, err

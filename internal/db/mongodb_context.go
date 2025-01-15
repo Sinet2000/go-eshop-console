@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log"
 	"time"
 
@@ -30,7 +31,7 @@ func NewMongoService(dbName string) (*MongoDbContext, error) {
 		Password:   mongoPassword,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
@@ -39,10 +40,10 @@ func NewMongoService(dbName string) (*MongoDbContext, error) {
 
 	if err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
-		panic(err)
+		return nil, err
 	}
 
-	if err := ensureHealthy(client); err != nil {
+	if err := ensureHealthy(client, ctx); err != nil {
 		// If ping fails, disconnect to avoid leaving the client in an inconsistent state
 		_ = client.Disconnect(context.Background())
 		return nil, err
@@ -68,19 +69,8 @@ func (m *MongoDbContext) Close() error {
 	return nil
 }
 
-// EnsureIsHealthy provides a health check for the database (public function).
-func EnsureIsHealthy(client *mongo.Client) bool {
-	err := ensureHealthy(client)
-	return err == nil
-}
-
-func ensureHealthy(client *mongo.Client) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err := client.Ping(ctx, nil)
-	if err != nil {
-		log.Printf("Database status check failed: %v", err)
+func ensureHealthy(client *mongo.Client, ctx context.Context) error {
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		return err
 	}
 

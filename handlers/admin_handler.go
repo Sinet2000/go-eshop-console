@@ -11,7 +11,6 @@ import (
 )
 
 type AdminHandler struct {
-	// productrepo *db.ProductRepository
 	productService *services.ProductService
 }
 
@@ -20,11 +19,11 @@ func NewAdminHandler(productRepo *db.ProductRepository) *AdminHandler {
 	return &AdminHandler{productService: productService}
 }
 
-func (h *AdminHandler) HandleAdminMenu() bool {
+func (h *AdminHandler) RunAdminMenu() bool {
 	productHandler := NewProductMngmtHandler(h.productService)
 
 	for {
-		views.DispalyAdminMenu()
+		views.DisplayAdminMenu()
 
 		option, err := utils.PromptIntInput()
 		if err != nil {

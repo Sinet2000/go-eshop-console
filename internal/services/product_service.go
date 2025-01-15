@@ -40,6 +40,15 @@ func (s *ProductService) GetProductById(ctx context.Context, id string) (*entiti
 	return product, nil
 }
 
+func (s *ProductService) GetProductsTotalCount(ctx context.Context) (int64, error) {
+	count, err := s.repo.CountProducts(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("cannot count products : %v", err)
+	}
+
+	return count, nil
+}
+
 func (s *ProductService) Seed(ctx context.Context) error {
 	// Count the products in the collection
 	count, err := s.repo.CountProducts(ctx)

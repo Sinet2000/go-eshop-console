@@ -36,7 +36,7 @@ func Confirm(confirmPrompt string) (bool, error) {
 	}
 }
 
-func PromptUserForSelection() (int, error) {
+func PromptIntInput() (int, error) {
 	fmt.Printf("\nSelect an option: ")
 	reader := bufio.NewReader(os.Stdin)
 
@@ -58,4 +58,19 @@ func PromptUserForSelection() (int, error) {
 	// fmt.Scanln()
 
 	return choice, nil
+}
+
+func PromptStrInput() (string, error) {
+	fmt.Printf("\nEnter a string: ")
+	reader := bufio.NewReader(os.Stdin)
+
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		logger.PrintlnColoredText("❗ Failed to read input. Please try again. ❗", logger.RedTxtColorCode)
+		return "", err
+	}
+
+	input = strings.TrimSpace(input)
+
+	return input, nil
 }

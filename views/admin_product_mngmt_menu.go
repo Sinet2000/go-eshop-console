@@ -22,6 +22,7 @@ func DisplayAdminProductMngmtMenu() {
 	table.Append([]string{"[3]", "Create Product"})
 	table.Append([]string{"[4]", "Update Product"})
 	table.Append([]string{"[5]", "Delete Product"})
+	table.Append([]string{"[9]", "Seed Products"})
 	table.Append([]string{"[0]", "Quit 🚪"})
 
 	table.Render()

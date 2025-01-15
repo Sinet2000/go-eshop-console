@@ -147,9 +147,32 @@ Customer Menu:
 [0] Exit
 ```
 
-### Example: Pagination Workflow:
+### Example: Products List Pagination:
 ```bash
-Admin: View All Orders (Page 1)  
+Admin: Products (Page 1)  
+---------------------------------  
+Order ID: 67854f6b298f5112b3ce1a87 | Name: ... 
+Order ID: 67854f6b298f5112b3ce1a89 | Name: ... 
+Order ID: 67854f6b298f5112b3ce1a8b | Name:  ...
+...  
+[15 products shown]  
+
+Options:
+[N] Next Page   [B] Back
+
+[1] Update product
+[2] Display Product Details
+[3] Delete Product
+[0] Quit
+
+Select an option: _
+
+```
+
+
+### Example: Orders List Pagination:
+```bash
+Admin: Orders (Page 1)  
 ---------------------------------  
 Order ID: 1 | Status: Pending ... 
 Order ID: 2 | Status: Processing ... 

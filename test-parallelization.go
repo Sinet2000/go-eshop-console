@@ -32,7 +32,7 @@ func fetchWeather(city string, wg *sync.WaitGroup, results chan<- string) {
 	results <- weatherInfo
 }
 
-func mainAdditional() {
+func main() {
 	// Seed the random number generator using the current time in nanoseconds.
 	// This ensures random values vary each time you run the program.
 	rand.Seed(time.Now().UnixNano())

@@ -6,7 +6,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func DisplayMainMenu() {
+func ShowMainMenu() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Option", "Action"})
 	// table.SetBorder(true)
@@ -19,7 +19,6 @@ func DisplayMainMenu() {
 	table.Append([]string{"[3]", "Edit Product 🔄"})
 	table.Append([]string{"[4]", "Delete Product 🗑️"})
 	table.Append([]string{"[5]", "Create Product 🆕"})
-	table.Append([]string{"[6]", "Seed Products 🆕"})
 	table.Append([]string{"[0]", "Quit 🛑"})
 	table.Render() // Print the formatted table
 }

@@ -28,6 +28,7 @@ func ListProducts(products []entities.Product) {
 			fmt.Sprintf("%.2f", product.Price),
 		})
 	}
+	table.SetFooter([]string{"", "", "Count", fmt.Sprintf("%d", len(products))})
 	table.Render()
 }
 

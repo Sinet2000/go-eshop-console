@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/pagination"
 	"log"
 
 	"github.com/Sinet2000/go-eshop-console/config"
@@ -22,11 +23,27 @@ func NewProductService(repo *db.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 
+func (s *ProductService) Create(newProduct *entities.Product, ctx context.Context) (*entities.Product, error) {
+	return s.repo.Create(newProduct, ctx)
+}
+
+func (s *ProductService) Update(updatedProduct *entities.Product, ctx context.Context) error {
+	return s.repo.Update(updatedProduct, ctx)
+}
+
+func (s *ProductService) UpdateAndReturn(updatedProduct *entities.Product, ctx context.Context) (*entities.Product, error) {
+	return s.repo.UpdateAndReturn(updatedProduct, ctx)
+}
+
 func (s *ProductService) ListAllProducts(ctx context.Context) ([]entities.Product, error) {
 	return s.repo.ListAll(ctx)
 }
 
-func (s *ProductService) GetProductById(ctx context.Context, id string) (*entities.Product, error) {
+func (s *ProductService) ListAllProductsPaged(ctx context.Context, pq *pagination.PageQuery) (pagination.PagedResult[entities.Product], error) {
+	return s.repo.ListPaged(ctx, pq)
+}
+
+func (s *ProductService) GetById(ctx context.Context, id string) (*entities.Product, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid ID format: %v", err)
@@ -40,22 +57,26 @@ func (s *ProductService) GetProductById(ctx context.Context, id string) (*entiti
 	return product, nil
 }
 
+func (s *ProductService) GetProductsTotalCount(ctx context.Context) (int64, error) {
+	return s.repo.CountProducts(ctx, nil)
+}
+
 func (s *ProductService) Seed(ctx context.Context) error {
 	// Count the products in the collection
-	count, err := s.repo.CountProducts(ctx)
+	count, err := s.repo.CountProducts(ctx, nil)
 	if err != nil {
 		log.Fatalf("Error counting products: %v", err)
 	}
 
-	fmt.Println("Seeding the database with products...")
+	logger.PrintlnColoredText("Seeding products from JSON ...", logger.GrayColor)
 
 	if count > 0 {
-		logger.PrintColoredText("Products are already seeded to DB: ", logger.GrayTxtColorCode)
+		logger.PrintColoredText("Products are already seeded to DB: ", logger.GrayColor)
 		return nil
 	}
 
 	fsr := &file_reader.FileSystemReader{}
-	products, err := readProductsFromFile(fsr)
+	products, err := readProductsFromFile(ctx, fsr)
 	if err != nil {
 		return fmt.Errorf("error reading products from file: %w", err)
 	}
@@ -70,12 +91,12 @@ func (s *ProductService) Seed(ctx context.Context) error {
 		return fmt.Errorf("error inserting products: %w", err)
 	}
 
-	logger.PrintColoredText("The DB is seeded with the products ...", logger.GrayTxtColorCode)
+	logger.PrintColoredText("The DB is seeded with the products ...", logger.GrayColor)
 
 	return nil
 }
 
-func readProductsFromFile(reader file_reader.FileReader) ([]entities.Product, error) {
+func readProductsFromFile(ctx context.Context, reader file_reader.FileReader) ([]entities.Product, error) {
 	filePaths := config.NewFilePaths()
 	fileContent, err := reader.ReadFile(filePaths.ProductsFilePath)
 	if err != nil {

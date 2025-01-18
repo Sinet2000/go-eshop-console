@@ -26,7 +26,7 @@ type Order struct {
 	ID           int
 	CustomerID   int
 	Status       OrderStatus
-	TotalPrice   float32
+	TotalPrice   float64
 	Currency     string
 	OrderDate    time.Time
 	ShippingDate time.Time
@@ -76,8 +76,8 @@ func (o *Order) CanChangeStatusTo(newStatus OrderStatus) bool {
 	return false
 }
 
-func (o *Order) CalculateTotalPrice() float32 {
-	var total float32
+func (o *Order) CalculateTotalPrice() float64 {
+	var total float64
 	for _, product := range o.Products {
 		total += product.Price
 	}

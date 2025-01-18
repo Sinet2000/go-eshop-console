@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -19,13 +20,13 @@ func NewAdminHandler(productRepo *db.ProductRepository) *AdminHandler {
 	return &AdminHandler{productService: productService}
 }
 
-func (h *AdminHandler) RunAdminMenu() bool {
+func (h *AdminHandler) RunAdminMenu(ctx context.Context) bool {
 	productHandler := NewProductMngmtHandler(h.productService)
 
 	for {
 		views.DisplayAdminMenu()
 
-		option, err := utils.PromptIntInput()
+		option, err := utils.PromptIntInput("Select an option: ")
 		if err != nil {
 			log.Printf("Error: %v\n", err)
 			continue
@@ -33,7 +34,7 @@ func (h *AdminHandler) RunAdminMenu() bool {
 
 		switch option {
 		case 1:
-			productHandler.HandleAdminManageProducts()
+			productHandler.HandleAdminManageProducts(ctx)
 		case 2:
 			handleManageOrders()
 		case 3:

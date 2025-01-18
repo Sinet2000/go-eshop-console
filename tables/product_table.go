@@ -8,14 +8,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ListProducts(products []entities.Product, caption ...string) {
-	defaultCaption := "WSC - Products Stock 📦"
-	if len(caption) > 0 {
-		defaultCaption = caption[0]
-	}
-
+func ListProducts(products []entities.Product) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetCaption(true, defaultCaption)
+	table.SetCaption(true, "WSC - Products Stock 📦")
 	table.SetHeader([]string{"ID", "Name", "SKU", "Price"})
 
 	for _, product := range products {
@@ -34,7 +29,6 @@ func ListProducts(products []entities.Product, caption ...string) {
 		})
 	}
 	table.SetFooter([]string{"", "", "Count", fmt.Sprintf("%d", len(products))})
-	table.SetFooter([]string{"", "", "Count", fmt.Sprintf("%d", 23)})
 	table.Render()
 }
 

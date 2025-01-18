@@ -17,7 +17,7 @@ type MongoDbContext struct {
 	DB     *mongo.Database
 }
 
-func NewMongoService(dbName string) (*MongoDbContext, error) {
+func NewMongoService(dbName string, ctx context.Context) (*MongoDbContext, error) {
 	config.LoadConfig()
 
 	mongoURI := config.GetEnv("MONGO_URI")
@@ -30,9 +30,6 @@ func NewMongoService(dbName string) (*MongoDbContext, error) {
 		Username:   mongoUser,
 		Password:   mongoPassword,
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
 
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(mongoURI).SetAuth(credential).SetServerAPIOptions(serverAPI)
@@ -49,7 +46,7 @@ func NewMongoService(dbName string) (*MongoDbContext, error) {
 		return nil, err
 	}
 
-	logger.PrintlnColoredText("Successfully connected to MongoDB!", logger.GreenTxtColorCode)
+	logger.PrintlnColoredText("Successfully connected to MongoDB!", logger.SuccessColor)
 	return &MongoDbContext{
 		Client: client,
 		DB:     client.Database(dbName),
@@ -65,7 +62,7 @@ func (m *MongoDbContext) Close() error {
 		return err
 	}
 
-	logger.PrintlnColoredText("Disconnected from MongoDB!", logger.GrayTxtColorCode)
+	logger.PrintlnColoredText("Disconnected from MongoDB!", logger.GrayColor)
 	return nil
 }
 
@@ -74,6 +71,6 @@ func ensureHealthy(client *mongo.Client, ctx context.Context) error {
 		return err
 	}
 
-	logger.PrintlnColoredText("Database is healthy!", logger.GreenTxtColorCode)
+	logger.PrintlnColoredText("Database is healthy!", logger.SuccessColor)
 	return nil
 }

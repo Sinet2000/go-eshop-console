@@ -50,7 +50,7 @@ func NewPgService() (*PostgreSqlDbContext, error) {
 
 	fmt.Println(firstName)
 
-	logger.PrintlnColoredText(fmt.Sprintf("Connected to PostgreSQL Db : %s!", dbName), logger.GreenTxtColorCode)
+	logger.PrintlnColoredText(fmt.Sprintf("Connected to PostgreSQL Db : %s!", dbName), logger.SuccessColor)
 
 	return &PostgreSqlDbContext{Conn: conn}, nil
 }

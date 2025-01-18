@@ -81,6 +81,20 @@ func (r *ProductRepository) Update(updatedProduct *entities.Product, ctx context
 	return nil
 }
 
+func (r *ProductRepository) DeleteById(id primitive.ObjectID, ctx context.Context) error {
+	filter := bson.M{"_id": id}
+	result, err := r.collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("failed to delete product with ID %s: %w", id.Hex(), err)
+	}
+
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("no product found with ID %s", id.Hex())
+	}
+
+	return nil
+}
+
 func (r *ProductRepository) UpdateAndReturn(updatedProduct *entities.Product, ctx context.Context) (*entities.Product, error) {
 	if updatedProduct.ID.IsZero() {
 		return nil, fmt.Errorf("product ID cannot be zero")

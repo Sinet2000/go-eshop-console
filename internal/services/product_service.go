@@ -35,6 +35,15 @@ func (s *ProductService) UpdateAndReturn(updatedProduct *entities.Product, ctx c
 	return s.repo.UpdateAndReturn(updatedProduct, ctx)
 }
 
+func (s *ProductService) DeleteById(id string, ctx context.Context) error {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid ID format: %v", err)
+	}
+
+	return s.repo.DeleteById(objectID, ctx)
+}
+
 func (s *ProductService) ListAllProducts(ctx context.Context) ([]entities.Product, error) {
 	return s.repo.ListAll(ctx)
 }
@@ -76,7 +85,7 @@ func (s *ProductService) Seed(ctx context.Context) error {
 	}
 
 	fsr := &file_reader.FileSystemReader{}
-	products, err := readProductsFromFile(ctx, fsr)
+	products, err := readProductsFromFile(fsr, ctx)
 	if err != nil {
 		return fmt.Errorf("error reading products from file: %w", err)
 	}
@@ -96,7 +105,7 @@ func (s *ProductService) Seed(ctx context.Context) error {
 	return nil
 }
 
-func readProductsFromFile(ctx context.Context, reader file_reader.FileReader) ([]entities.Product, error) {
+func readProductsFromFile(reader file_reader.FileReader, ctx context.Context) ([]entities.Product, error) {
 	filePaths := config.NewFilePaths()
 	fileContent, err := reader.ReadFile(filePaths.ProductsFilePath)
 	if err != nil {

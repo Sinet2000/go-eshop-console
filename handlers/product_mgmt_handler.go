@@ -42,9 +42,9 @@ func (h *ProductMngmtHandler) HandleAdminManageProducts(ctx context.Context) {
 		case 3:
 			h.handleCreateProduct(ctx)
 		case 4:
-			h.handleUpdateProduct()
+			h.handleUpdateProduct(ctx)
 		case 5:
-			h.handleDeleteProduct()
+			h.handleDeleteProduct(ctx)
 		case 6:
 			h.handleGetProductDetails(ctx)
 		case 9:
@@ -125,7 +125,7 @@ func (h *ProductMngmtHandler) handleListProductsPaged(ctx context.Context) {
 			}
 
 		case "1":
-			h.updateProduct(ctx)
+			h.handleUpdateProduct(ctx)
 
 		case "0":
 			logger.PrintlnColoredText("Exiting Product Management ...", logger.GrayColor)
@@ -193,12 +193,17 @@ func (h *ProductMngmtHandler) handleCreateProduct(ctx context.Context) {
 	}
 }
 
-func (h *ProductMngmtHandler) handleUpdateProduct() {
+func (h *ProductMngmtHandler) handleDeleteProduct(ctx context.Context) {
+	productId, err := utils.PromptStrInput("Enter the product ID: ")
+	if err != nil {
+		logger.PrintlnColoredText("❗ Invalid input. Please enter valid product ID ❗", logger.ErrorColor)
+		return
+	}
 
-}
-
-func (h *ProductMngmtHandler) handleDeleteProduct() {
-
+	err = h.productService.DeleteById(productId, ctx)
+	if err != nil {
+		fmt.Printf("\n%v", err)
+	}
 }
 
 func (h *ProductMngmtHandler) handleGetProductDetails(ctx context.Context) *entities.Product {
@@ -232,7 +237,7 @@ func (h *ProductMngmtHandler) handleSeedProducts(ctx context.Context) {
 	}
 }
 
-func (h *ProductMngmtHandler) updateProduct(ctx context.Context) {
+func (h *ProductMngmtHandler) handleUpdateProduct(ctx context.Context) {
 	fmt.Println("\n----------------------------------------------")
 	fmt.Println("|         Update an Existing Product         |")
 	fmt.Println("----------------------------------------------")

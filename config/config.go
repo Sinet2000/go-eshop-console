@@ -31,13 +31,15 @@ func GetProjectRoot() string {
 }
 
 type FilePaths struct {
-	ProductsFilePath string
+	ProductsFilePath  string
+	CustomersFilePath string
 }
 
 // NewFilePaths initializes file paths based on project root.
 func NewFilePaths() *FilePaths {
 	root := GetProjectRoot()
 	return &FilePaths{
-		ProductsFilePath: filepath.Join(root, "data", "products.json"), // Absolute path to the products file
+		ProductsFilePath:  filepath.Join(root, "data", "products.json"),
+		CustomersFilePath: filepath.Join(root, "data", "customers.json"),
 	}
 }

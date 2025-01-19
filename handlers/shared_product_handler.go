@@ -23,7 +23,7 @@ func NewSharedProductHandler(productService *services.ProductService) *SharedPro
 func (h *SharedProductHandler) HandleListProducts(ctx context.Context) {
 	logger.PrintlnColoredText("📜 Retrieving products from storage ...", logger.GrayColor)
 
-	productsList, err := h.productService.ListAllProducts(ctx)
+	productsList, err := h.productService.ListAll(ctx)
 	if err != nil {
 		log.Fatalf("Error fetching products: %v", err)
 	}

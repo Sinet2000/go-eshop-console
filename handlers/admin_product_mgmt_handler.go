@@ -27,7 +27,6 @@ func NewAdminProductMngmtHandler(productService *services.ProductService) *Admin
 }
 
 func (h *AdminProductMngmtHandler) HandleAdminManageProducts(ctx context.Context) {
-
 	for {
 		views.DisplayAdminProductMngmtMenu()
 		option, err := utils.PromptIntInput("Select an option: ")
@@ -64,7 +63,7 @@ func (h *AdminProductMngmtHandler) handleListProductsPaged(ctx context.Context) 
 	var pageIndex int64 = 1
 
 	for {
-		productsPageResult, err := h.productService.ListAllProductsPaged(ctx, &pagination.PageQuery{PageIndex: pageIndex, PageSize: 5})
+		productsPageResult, err := h.productService.ListAllPaged(ctx, &pagination.PageQuery{PageIndex: pageIndex, PageSize: 5})
 		if err != nil {
 			log.Fatalf("%v", err)
 			return
@@ -112,7 +111,7 @@ func (h *AdminProductMngmtHandler) handleListProductsPaged(ctx context.Context) 
 		case "1":
 			h.handleUpdateProduct(ctx)
 		case "2":
-			h.handleUpdateProduct(ctx)
+			h.sharedProductHandler.HandleGetProductDetails(ctx)
 		case "3":
 			h.handleDeleteProduct(ctx)
 		case "0":
@@ -197,7 +196,7 @@ func (h *AdminProductMngmtHandler) handleDeleteProduct(ctx context.Context) {
 func (h *AdminProductMngmtHandler) handleSeedProducts(ctx context.Context) {
 	err := h.productService.Seed(ctx)
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Printf("%v\n", err)
 	}
 }
 

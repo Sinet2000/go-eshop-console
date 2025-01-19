@@ -27,21 +27,6 @@ func NewProductRepository(db *mongo.Database) *ProductRepository {
 
 func (r *ProductRepository) GetById(ctx context.Context, id primitive.ObjectID) (*entities.Product, error) {
 	return r.BaseRepoImpl.GetById(ctx, id)
-	//ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	//defer cancel()
-	//
-	//var product entities.Product
-	//filter := bson.M{"_id": id}
-	//
-	//err := r.collection.FindOne(ctx, filter).Decode(&product)
-	//if err != nil {
-	//	if errors.Is(err, mongo.ErrNoDocuments) {
-	//		return nil, fmt.Errorf("product not found")
-	//	}
-	//	return nil, err
-	//}
-	//
-	//return &product, nil
 }
 
 func (r *ProductRepository) Create(newProduct *entities.Product, ctx context.Context) (*entities.Product, error) {
@@ -73,9 +58,13 @@ func (r *ProductRepository) Update(updatedProduct *entities.Product, ctx context
 		},
 	}
 
-	_, err := r.collection.UpdateOne(ctx, filter, update)
+	result, err := r.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return fmt.Errorf("failed to update product with ID %s: %w", updatedProduct.ID.Hex(), err)
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("no product found with ID %s", updatedProduct.ID.Hex())
 	}
 
 	return nil

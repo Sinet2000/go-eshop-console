@@ -31,9 +31,6 @@ func main() {
 		}
 	}()
 
-	productRepo := db.NewProductRepository(mongoDbContext.DB)
-	fmt.Println()
-
 	for {
 		isAdmin, err := utils.Confirm("Are you admin? [y/n]: ")
 		if err != nil {
@@ -41,10 +38,10 @@ func main() {
 		}
 
 		if isAdmin {
-			adminMenuHandler := handlers.NewAdminHandler(productRepo)
+			adminMenuHandler := handlers.NewAdminHandler(mongoDbContext.DB)
 			adminMenuHandler.RunAdminMenu(ctx)
 		} else {
-			clientMenuHandler := handlers.NewClientHandler(productRepo)
+			clientMenuHandler := handlers.NewClientHandler(mongoDbContext.DB)
 			clientMenuHandler.RunClientMenu(ctx)
 		}
 

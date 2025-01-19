@@ -4,14 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Sinet2000/go-eshop-console/internal/utils/pagination"
-	"log"
-
 	"github.com/Sinet2000/go-eshop-console/config"
 	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/entities"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/file_reader"
 	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
+	"github.com/Sinet2000/go-eshop-console/internal/utils/pagination"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -44,11 +42,11 @@ func (s *ProductService) DeleteById(id string, ctx context.Context) error {
 	return s.repo.DeleteById(objectID, ctx)
 }
 
-func (s *ProductService) ListAllProducts(ctx context.Context) ([]entities.Product, error) {
+func (s *ProductService) ListAll(ctx context.Context) ([]entities.Product, error) {
 	return s.repo.ListAll(ctx)
 }
 
-func (s *ProductService) ListAllProductsPaged(ctx context.Context, pq *pagination.PageQuery) (pagination.PagedResult[entities.Product], error) {
+func (s *ProductService) ListAllPaged(ctx context.Context, pq *pagination.PageQuery) (pagination.PagedResult[entities.Product], error) {
 	return s.repo.ListPaged(ctx, pq)
 }
 
@@ -74,7 +72,7 @@ func (s *ProductService) Seed(ctx context.Context) error {
 	// Count the products in the collection
 	count, err := s.repo.CountProducts(ctx, nil)
 	if err != nil {
-		log.Fatalf("Error counting products: %v", err)
+		return fmt.Errorf("error counting products: %w", err)
 	}
 
 	logger.PrintlnColoredText("Seeding products from JSON ...", logger.GrayColor)
@@ -85,7 +83,7 @@ func (s *ProductService) Seed(ctx context.Context) error {
 	}
 
 	fsr := &file_reader.FileSystemReader{}
-	products, err := readProductsFromFile(fsr, ctx)
+	products, err := s.readProductsFromFile(fsr, ctx)
 	if err != nil {
 		return fmt.Errorf("error reading products from file: %w", err)
 	}
@@ -105,7 +103,7 @@ func (s *ProductService) Seed(ctx context.Context) error {
 	return nil
 }
 
-func readProductsFromFile(reader file_reader.FileReader, ctx context.Context) ([]entities.Product, error) {
+func (s *ProductService) readProductsFromFile(reader file_reader.FileReader, ctx context.Context) ([]entities.Product, error) {
 	filePaths := config.NewFilePaths()
 	fileContent, err := reader.ReadFile(filePaths.ProductsFilePath)
 	if err != nil {

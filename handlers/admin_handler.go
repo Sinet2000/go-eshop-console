@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 
 	"github.com/Sinet2000/go-eshop-console/internal/db"
@@ -12,16 +13,20 @@ import (
 )
 
 type AdminHandler struct {
-	productService *services.ProductService
+	productService  *services.ProductService
+	customerService *services.CustomerService
 }
 
-func NewAdminHandler(productRepo *db.ProductRepository) *AdminHandler {
+func NewAdminHandler(dbContext *mongo.Database) *AdminHandler {
+	productRepo := db.NewProductRepository(dbContext)
 	productService := services.NewProductService(productRepo)
-	return &AdminHandler{productService: productService}
+
+	customerRepo := db.NewCustomerRepository(dbContext)
+	customerService := services.NewCustomerService(customerRepo)
+	return &AdminHandler{productService: productService, customerService: customerService}
 }
 
 func (h *AdminHandler) RunAdminMenu(ctx context.Context) bool {
-	productHandler := NewAdminProductMngmtHandler(h.productService)
 
 	for {
 		views.DisplayAdminMenu()
@@ -34,11 +39,14 @@ func (h *AdminHandler) RunAdminMenu(ctx context.Context) bool {
 
 		switch option {
 		case 1:
+			productHandler := NewAdminProductMngmtHandler(h.productService)
 			productHandler.HandleAdminManageProducts(ctx)
 		case 2:
 			handleManageOrders()
 		case 3:
-			handleManageCustomers()
+			fmt.Println("Opening customer management... 👥")
+			customerHandler := NewAdminCustomerMgmtHandler(h.customerService)
+			customerHandler.handleUpdateCustomer(ctx)
 		case 4:
 			handleAnalytics()
 		case 5:
@@ -57,13 +65,6 @@ func handleManageOrders() {
 	fmt.Println("Opening order management... 🛒")
 	// Implement logic for managing orders.
 	fmt.Println("Order management not yet implemented.")
-}
-
-// handleManageCustomers handles actions related to customer management.
-func handleManageCustomers() {
-	fmt.Println("Opening customer management... 👥")
-	// Implement logic for managing customers.
-	fmt.Println("Customer management not yet implemented.")
 }
 
 // handleAnalytics handles actions related to analytics.

@@ -77,7 +77,7 @@ func (h *ClientHandler) handleListProductsPaged(ctx context.Context) {
 	var pageIndex int64 = 1
 
 	for {
-		productsPageResult, err := h.productService.ListAllProductsPaged(ctx, &pagination.PageQuery{PageIndex: pageIndex, PageSize: 5})
+		productsPageResult, err := h.productService.ListAllPaged(ctx, &pagination.PageQuery{PageIndex: pageIndex, PageSize: 5})
 		if err != nil {
 			log.Fatalf("%v", err)
 			return

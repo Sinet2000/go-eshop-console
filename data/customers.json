@@ -1,0 +1,104 @@
+[
+  {
+    "first_name": "John",
+    "last_name": "Doe",
+    "company_name": "",
+    "customer_type": 0,
+    "contact_info": {
+      "email": "john.doe@example.com",
+      "phone": "+1234567890"
+    },
+    "address": {
+      "street": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10001",
+      "country": "USA"
+    }
+  },
+  {
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "company_name": "",
+    "customer_type": 0,
+    "contact_info": {
+      "email": "jane.smith@example.com",
+      "phone": "+1987654321"
+    },
+    "address": {
+      "street": "456 Elm St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "postal_code": "90001",
+      "country": "USA"
+    }
+  },
+  {
+    "first_name": "Michael",
+    "last_name": "Johnson",
+    "company_name": "",
+    "customer_type": 0,
+    "contact_info": {
+      "email": "michael.johnson@example.com",
+      "phone": "+1123456789"
+    },
+    "address": {
+      "street": "789 Oak St",
+      "city": "Chicago",
+      "state": "IL",
+      "postal_code": "60601",
+      "country": "USA"
+    }
+  },
+  {
+    "first_name": "Emily",
+    "last_name": "Davis",
+    "company_name": "",
+    "customer_type": 0,
+    "contact_info": {
+      "email": "emily.davis@example.com",
+      "phone": "+1765432190"
+    },
+    "address": {
+      "street": "101 Pine St",
+      "city": "Houston",
+      "state": "TX",
+      "postal_code": "77001",
+      "country": "USA"
+    }
+  },
+  {
+    "first_name": "Chris",
+    "last_name": "Brown",
+    "company_name": "",
+    "customer_type": 0,
+    "contact_info": {
+      "email": "chris.brown@example.com",
+      "phone": "+1345678901"
+    },
+    "address": {
+      "street": "202 Maple St",
+      "city": "Phoenix",
+      "state": "AZ",
+      "postal_code": "85001",
+      "country": "USA"
+    }
+  },
+  {
+    "first_name": "Sarah",
+    "last_name": "Wilson",
+    "company_name": "",
+    "customer_type": 0,
+    "contact_info": {
+      "email": "sarah.wilson@example.com",
+      "phone": "+1543210987"
+    },
+    "address": {
+      "street": "303 Cedar St",
+      "city": "Philadelphia",
+      "state": "PA",
+      "postal_code": "19101",
+      "country": "USA"
+    }
+  }
+]

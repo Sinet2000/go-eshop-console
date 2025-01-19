@@ -10,7 +10,7 @@ import (
 )
 
 func DisplayAdminProductMngmtMenu() {
-	fmt.Println("WSC - Admin Menu 🛠️")
+	fmt.Println("WSC - Admin Product Management Menu 🛠️")
 	currentTime := time.Now().Format("2006-01-02 15:04")
 	fmt.Printf("Hello %s - %s\n", config.GetEnv("ADMIN_NAME"), currentTime)
 

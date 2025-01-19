@@ -2,6 +2,7 @@ package entities
 
 import (
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/Sinet2000/go-eshop-console/exceptions"
 )
@@ -13,37 +14,64 @@ const (
 	Company
 )
 
-type Customer struct {
-	ID           uint `gorm:"primaryKey"`
-	FirstName    string
-	LastName     string
-	CompanyName  string
-	CustomerType CustomerType
-	// ContactInfo  ContactInfo
+type ContactInfo struct {
+	Email string `json:"email" bson:"email"`
+	Phone string `json:"phone" bson:"phone"`
 }
 
-func NewCustomer(id uint, customerType CustomerType, firstName, lastName, companyName string, contactInfo ContactInfo) (*Customer, error) {
-	// Validate for Person (Individual)
+type Address struct {
+	Street     string `json:"street" bson:"street"`
+	City       string `json:"city" bson:"city"`
+	State      string `json:"state" bson:"state"`
+	PostalCode string `json:"postal_code" bson:"postal_code"`
+	Country    string `json:"country" bson:"country"`
+}
+
+type Customer struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	FirstName    string             `json:"first_name" bson:"first_name"`
+	LastName     string             `json:"last_name" bson:"last_name"`
+	CompanyName  string             `json:"company_name" bson:"company_name"`
+	CustomerType CustomerType       `json:"customer_type" bson:"customer_type"`
+	ContactInfo  ContactInfo        `json:"contact_info" bson:"contact_info"`
+	Address      Address            `json:"address" bson:"address"`
+}
+
+func NewCustomer(
+	customerType CustomerType,
+	firstName, lastName, companyName string,
+	contactInfo ContactInfo,
+	address Address,
+) (*Customer, error) {
+
 	if customerType == Individual {
 		if firstName == "" || lastName == "" {
 			return nil, &exceptions.DomainException{Message: "First name and last name cannot be empty"}
 		}
 	}
 
-	// Validate for Company
 	if customerType == Company {
 		if companyName == "" {
 			return nil, &exceptions.DomainException{Message: "Company name cannot be empty"}
 		}
 	}
 
+	if contactInfo.Email == "" || contactInfo.Phone == "" {
+		return nil, &exceptions.DomainException{Message: "Email and phone number cannot be empty"}
+	}
+
+	if address.Street == "" || address.City == "" || address.Country == "" {
+		return nil, &exceptions.DomainException{Message: "Street, city, and country in the address cannot be empty"}
+	}
+
 	customer := &Customer{
-		ID:           id,
+		ID:           primitive.NewObjectID(),
 		CustomerType: customerType,
 		FirstName:    firstName,
 		LastName:     lastName,
 		CompanyName:  companyName,
-		// ContactInfo:  contactInfo,
+		ContactInfo:  contactInfo,
+		Address:      address,
 	}
 
 	return customer, nil

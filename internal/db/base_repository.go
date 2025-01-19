@@ -53,7 +53,7 @@ func (r *BaseRepoImpl[T]) Update(id int, entity T) error {
 	return fmt.Errorf("update method not implemented for %T", entity)
 }
 
-func (r *BaseRepoImpl[T]) ListAll() ([]T, error) {
+func (r *BaseRepoImpl[T]) ListAll(ctx context.Context) ([]T, error) {
 	return nil, fmt.Errorf("ListAll method not implemented for type %T", *new(T))
 }
 

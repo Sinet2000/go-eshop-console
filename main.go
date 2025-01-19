@@ -7,20 +7,10 @@ import (
 	"github.com/Sinet2000/go-eshop-console/handlers"
 	"github.com/Sinet2000/go-eshop-console/internal/db"
 	"github.com/Sinet2000/go-eshop-console/internal/utils"
-	"github.com/Sinet2000/go-eshop-console/internal/utils/logger"
 	"log"
 )
 
 func main() {
-	isAdmin, err := utils.Confirm("Are you admin?")
-	if err != nil {
-		log.Fatalf("Error: %v", err)
-	}
-	if !isAdmin {
-		logger.PrintlnColoredText("UNAUTHORISED", logger.ErrorColor)
-		return
-	}
-
 	config.LoadConfig()
 	//_, err = db.NewPgService()
 	// if err != nil {
@@ -42,16 +32,33 @@ func main() {
 	}()
 
 	productRepo := db.NewProductRepository(mongoDbContext.DB)
-
 	fmt.Println()
 
 	for {
-		adminMenuHandler := handlers.NewAdminHandler(productRepo)
-		isExit := adminMenuHandler.RunAdminMenu(ctx)
+		isAdmin, err := utils.Confirm("Are you admin? [y/n]: ")
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
 
-		if isExit {
-			logger.PrintlnColoredText("Quit 🚪", logger.SuccessColor)
-			fmt.Println("Goodbye! 👋")
+		if isAdmin {
+			adminMenuHandler := handlers.NewAdminHandler(productRepo)
+			adminMenuHandler.RunAdminMenu(ctx)
+		} else {
+			clientMenuHandler := handlers.NewClientHandler(productRepo)
+			clientMenuHandler.RunClientMenu(ctx)
+		}
+
+		shouldExitProgram := false
+		for {
+			shouldExitProgram, err = utils.Confirm("Do you want to exit the program? [y/n]: ")
+			if err != nil {
+				log.Fatalf("Error: %v", err)
+			}
+
+			break
+		}
+
+		if shouldExitProgram {
 			break
 		}
 	}

@@ -21,7 +21,7 @@ func NewAdminHandler(productRepo *db.ProductRepository) *AdminHandler {
 }
 
 func (h *AdminHandler) RunAdminMenu(ctx context.Context) bool {
-	productHandler := NewProductMngmtHandler(h.productService)
+	productHandler := NewAdminProductMngmtHandler(h.productService)
 
 	for {
 		views.DisplayAdminMenu()

@@ -16,15 +16,17 @@ import (
 	"strconv"
 )
 
-type ProductMngmtHandler struct {
-	productService *services.ProductService
+type AdminProductMngmtHandler struct {
+	productService       *services.ProductService
+	sharedProductHandler *SharedProductHandler
 }
 
-func NewProductMngmtHandler(productService *services.ProductService) *ProductMngmtHandler {
-	return &ProductMngmtHandler{productService: productService}
+func NewAdminProductMngmtHandler(productService *services.ProductService) *AdminProductMngmtHandler {
+	sharedProductHandler := NewSharedProductHandler(productService)
+	return &AdminProductMngmtHandler{productService: productService, sharedProductHandler: sharedProductHandler}
 }
 
-func (h *ProductMngmtHandler) HandleAdminManageProducts(ctx context.Context) {
+func (h *AdminProductMngmtHandler) HandleAdminManageProducts(ctx context.Context) {
 
 	for {
 		views.DisplayAdminProductMngmtMenu()
@@ -36,7 +38,7 @@ func (h *ProductMngmtHandler) HandleAdminManageProducts(ctx context.Context) {
 
 		switch option {
 		case 1:
-			h.handleListProducts(ctx)
+			h.sharedProductHandler.HandleListProducts(ctx)
 		case 2:
 			h.handleListProductsPaged(ctx)
 		case 3:
@@ -46,7 +48,7 @@ func (h *ProductMngmtHandler) HandleAdminManageProducts(ctx context.Context) {
 		case 5:
 			h.handleDeleteProduct(ctx)
 		case 6:
-			h.handleGetProductDetails(ctx)
+			h.sharedProductHandler.HandleGetProductDetails(ctx)
 		case 9:
 			h.handleSeedProducts(ctx)
 		case 0:
@@ -57,24 +59,7 @@ func (h *ProductMngmtHandler) HandleAdminManageProducts(ctx context.Context) {
 	}
 }
 
-func (h *ProductMngmtHandler) handleListProducts(ctx context.Context) {
-	logger.PrintlnColoredText("📜 Retrieving products from storage ...", logger.GrayColor)
-
-	productsList, err := h.productService.ListAllProducts(ctx)
-	if err != nil {
-		log.Fatalf("Error fetching products: %v", err)
-	}
-
-	tables.ListProducts(productsList)
-
-	fmt.Println("\nPress Enter to continue...")
-	_, err = fmt.Scanln()
-	if err != nil {
-		return
-	}
-}
-
-func (h *ProductMngmtHandler) handleListProductsPaged(ctx context.Context) {
+func (h *AdminProductMngmtHandler) handleListProductsPaged(ctx context.Context) {
 	logger.PrintlnColoredText("📜 Retrieving products from storage ...", logger.GrayColor)
 	var pageIndex int64 = 1
 
@@ -126,7 +111,10 @@ func (h *ProductMngmtHandler) handleListProductsPaged(ctx context.Context) {
 
 		case "1":
 			h.handleUpdateProduct(ctx)
-
+		case "2":
+			h.handleUpdateProduct(ctx)
+		case "3":
+			h.handleDeleteProduct(ctx)
 		case "0":
 			logger.PrintlnColoredText("Exiting Product Management ...", logger.GrayColor)
 			return
@@ -142,7 +130,7 @@ func (h *ProductMngmtHandler) handleListProductsPaged(ctx context.Context) {
 	}
 }
 
-func (h *ProductMngmtHandler) handleCreateProduct(ctx context.Context) {
+func (h *AdminProductMngmtHandler) handleCreateProduct(ctx context.Context) {
 	fmt.Println("\n----------------------------------------------")
 	fmt.Println("|               Create a Product              |")
 	fmt.Println("----------------------------------------------")
@@ -193,7 +181,7 @@ func (h *ProductMngmtHandler) handleCreateProduct(ctx context.Context) {
 	}
 }
 
-func (h *ProductMngmtHandler) handleDeleteProduct(ctx context.Context) {
+func (h *AdminProductMngmtHandler) handleDeleteProduct(ctx context.Context) {
 	productId, err := utils.PromptStrInput("Enter the product ID: ")
 	if err != nil {
 		logger.PrintlnColoredText("❗ Invalid input. Please enter valid product ID ❗", logger.ErrorColor)
@@ -206,44 +194,20 @@ func (h *ProductMngmtHandler) handleDeleteProduct(ctx context.Context) {
 	}
 }
 
-func (h *ProductMngmtHandler) handleGetProductDetails(ctx context.Context) *entities.Product {
-	productId, err := utils.PromptStrInput("Enter the product ID: ")
-	if err != nil {
-		logger.PrintlnColoredText("❗ Invalid input. Please enter valid product ID ❗", logger.ErrorColor)
-		return nil
-	}
-
-	productDetails, err := h.productService.GetById(ctx, productId)
-	if err != nil {
-		logger.PrintlnColoredText(fmt.Sprintf("❗Error. Cannot get product details [ID=%s]. Error: %v", productId, err), logger.ErrorColor)
-		return nil
-	}
-
-	views.DisplayProductDetails(productDetails)
-
-	fmt.Println("\nPress Enter to continue...")
-	_, err = fmt.Scanln()
-	if err != nil {
-		return nil
-	}
-
-	return productDetails
-}
-
-func (h *ProductMngmtHandler) handleSeedProducts(ctx context.Context) {
+func (h *AdminProductMngmtHandler) handleSeedProducts(ctx context.Context) {
 	err := h.productService.Seed(ctx)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
 }
 
-func (h *ProductMngmtHandler) handleUpdateProduct(ctx context.Context) {
+func (h *AdminProductMngmtHandler) handleUpdateProduct(ctx context.Context) {
 	fmt.Println("\n----------------------------------------------")
 	fmt.Println("|         Update an Existing Product         |")
 	fmt.Println("----------------------------------------------")
 
 	// Print product details to update
-	var productToUpdate = h.handleGetProductDetails(ctx)
+	var productToUpdate = h.sharedProductHandler.HandleGetProductDetails(ctx)
 
 	fmt.Println("\nWhat would you like to update?")
 	table := tablewriter.NewWriter(os.Stdout)
